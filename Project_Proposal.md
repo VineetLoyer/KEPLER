@@ -1,0 +1,1 @@
+Objective - a real-time, multimodal pipeline that couples robust evidence retrieval with logical, multi-hop reasoning and confidence-rated verdicts for end users
