@@ -1,0 +1,173 @@
+/**
+ * VerdictDisplay Component Styles
+ */
+
+.verdict-display {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* Verdict Badge */
+.verdict-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 20px;
+  text-align: center;
+  align-self: flex-start;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.verdict-badge-text {
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Verdict color classes - distinct colors for each type */
+.verdict-badge.verdict-supported {
+  background-color: #10b981; /* Green */
+  color: white;
+}
+
+.verdict-badge.verdict-refuted {
+  background-color: #ef4444; /* Red */
+  color: white;
+}
+
+.verdict-badge.verdict-nei {
+  background-color: #f59e0b; /* Amber/Yellow */
+  color: white;
+}
+
+.verdict-badge.verdict-unknown {
+  background-color: #6b7280; /* Gray */
+  color: white;
+}
+
+/* Section Titles */
+.verdict-section-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #111827;
+  margin: 0 0 12px 0;
+}
+
+/* Confidence Section */
+.verdict-confidence-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.verdict-confidence-main {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.verdict-confidence-percentage-large {
+  font-size: 32px;
+  font-weight: 700;
+  color: #111827;
+  text-align: center;
+  margin-top: 8px;
+}
+
+/* Justification Section */
+.verdict-justification-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.verdict-justification-text {
+  font-size: 15px;
+  line-height: 1.6;
+  color: #374151;
+  margin: 0;
+  padding: 16px;
+  background-color: #f9fafb;
+  border-radius: 8px;
+  border-left: 4px solid #3b82f6;
+}
+
+/* Breakdown Section */
+.verdict-breakdown-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.verdict-breakdown-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 16px;
+  background-color: #f9fafb;
+  border-radius: 8px;
+}
+
+.verdict-breakdown-item {
+  display: flex;
+  align-items: center;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .verdict-display {
+    padding: 16px;
+    gap: 20px;
+  }
+
+  .verdict-badge {
+    padding: 10px 20px;
+    font-size: 18px;
+    align-self: stretch;
+    justify-content: center;
+  }
+
+  .verdict-section-title {
+    font-size: 15px;
+  }
+
+  .verdict-confidence-percentage-large {
+    font-size: 28px;
+  }
+
+  .verdict-justification-text {
+    font-size: 14px;
+    padding: 12px;
+  }
+
+  .verdict-breakdown-list {
+    padding: 12px;
+    gap: 12px;
+  }
+}
+
+/* Accessibility */
+.verdict-display:focus-within {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+/* Print styles */
+@media print {
+  .verdict-display {
+    box-shadow: none;
+    border: 1px solid #e5e7eb;
+  }
+
+  .verdict-badge {
+    box-shadow: none;
+    border: 2px solid currentColor;
+  }
+}

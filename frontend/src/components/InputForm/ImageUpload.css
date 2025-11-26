@@ -1,0 +1,136 @@
+/* ImageUpload Component Styles */
+
+.image-upload {
+  margin-bottom: 1.5rem;
+}
+
+.image-upload-header {
+  margin-bottom: 0.5rem;
+}
+
+.image-upload-label {
+  display: block;
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: #333;
+  margin-bottom: 0.5rem;
+}
+
+.image-upload-controls {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.image-upload-input {
+  display: none;
+}
+
+.image-upload-button {
+  display: inline-block;
+  padding: 0.625rem 1.25rem;
+  background-color: #4a90e2;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+  text-align: center;
+}
+
+.image-upload-button:hover:not(.disabled) {
+  background-color: #357abd;
+  transform: translateY(-1px);
+}
+
+.image-upload-button:active:not(.disabled) {
+  transform: translateY(0);
+}
+
+.image-upload-button.disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.image-remove-button {
+  padding: 0.625rem 1.25rem;
+  background-color: #e74c3c;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+.image-remove-button:hover:not(:disabled) {
+  background-color: #c0392b;
+  transform: translateY(-1px);
+}
+
+.image-remove-button:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.image-remove-button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.image-preview {
+  margin-top: 1rem;
+  padding: 1rem;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  background-color: #f9f9f9;
+}
+
+.image-preview img {
+  max-width: 100%;
+  max-height: 300px;
+  display: block;
+  margin: 0 auto;
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.image-filename {
+  margin-top: 0.75rem;
+  font-size: 0.875rem;
+  color: #666;
+  text-align: center;
+  word-break: break-all;
+}
+
+.error-message {
+  margin-top: 0.5rem;
+  padding: 0.75rem;
+  background-color: #fee;
+  border: 1px solid #fcc;
+  border-radius: 4px;
+  color: #c33;
+  font-size: 0.9rem;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .image-upload-controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .image-upload-button,
+  .image-remove-button {
+    width: 100%;
+  }
+
+  .image-preview img {
+    max-height: 200px;
+  }
+}

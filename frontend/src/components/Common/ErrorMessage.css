@@ -1,0 +1,138 @@
+/**
+ * ErrorMessage Component Styles
+ */
+
+.error-message-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  border-radius: 8px;
+  border: 1px solid;
+  margin-bottom: 16px;
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.error-message-validation {
+  background-color: #FEF3C7;
+  border-color: #F59E0B;
+  color: #92400E;
+}
+
+.error-message-api {
+  background-color: #FEE2E2;
+  border-color: #EF4444;
+  color: #991B1B;
+}
+
+.error-message-network {
+  background-color: #DBEAFE;
+  border-color: #3B82F6;
+  color: #1E40AF;
+}
+
+.error-message-general {
+  background-color: #FEE2E2;
+  border-color: #EF4444;
+  color: #991B1B;
+}
+
+.error-message-content {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.error-message-icon {
+  font-size: 24px;
+  flex-shrink: 0;
+}
+
+.error-message-text {
+  flex: 1;
+}
+
+.error-message-title {
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0 0 4px 0;
+}
+
+.error-message-description {
+  font-size: 14px;
+  margin: 0;
+  line-height: 1.5;
+}
+
+.error-message-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.error-message-button {
+  padding: 8px 16px;
+  border-radius: 6px;
+  border: none;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.error-message-retry {
+  background-color: #3B82F6;
+  color: white;
+}
+
+.error-message-retry:hover {
+  background-color: #2563EB;
+}
+
+.error-message-dismiss {
+  background-color: transparent;
+  color: inherit;
+  border: 1px solid currentColor;
+}
+
+.error-message-dismiss:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+  .error-message-container {
+    padding: 12px;
+  }
+
+  .error-message-icon {
+    font-size: 20px;
+  }
+
+  .error-message-title {
+    font-size: 14px;
+  }
+
+  .error-message-description {
+    font-size: 13px;
+  }
+
+  .error-message-actions {
+    flex-direction: column;
+  }
+
+  .error-message-button {
+    width: 100%;
+  }
+}

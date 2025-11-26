@@ -1,0 +1,152 @@
+/**
+ * LoadingIndicator Styles
+ * 
+ * Provides animated loading spinner with stage-specific messages
+ * Requirements: 2.4, 12.1, 12.2
+ */
+
+.loading-indicator {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 2rem;
+  min-height: 300px;
+  text-align: center;
+}
+
+/* Spinner Container */
+.loading-spinner-container {
+  margin-bottom: 1.5rem;
+}
+
+/* SVG Spinner */
+.loading-spinner {
+  width: 60px;
+  height: 60px;
+  animation: rotate 2s linear infinite;
+}
+
+/* Spinner Track (background circle) */
+.loading-spinner-track {
+  stroke: #e5e7eb;
+  opacity: 0.3;
+}
+
+/* Spinner Path (animated circle) */
+.loading-spinner-path {
+  stroke: #3b82f6;
+  stroke-dasharray: 1, 150;
+  stroke-dashoffset: 0;
+  animation: dash 1.5s ease-in-out infinite;
+}
+
+/* Rotation Animation */
+@keyframes rotate {
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* Dash Animation */
+@keyframes dash {
+  0% {
+    stroke-dasharray: 1, 150;
+    stroke-dashoffset: 0;
+  }
+  50% {
+    stroke-dasharray: 90, 150;
+    stroke-dashoffset: -35;
+  }
+  100% {
+    stroke-dasharray: 90, 150;
+    stroke-dashoffset: -124;
+  }
+}
+
+/* Loading Content */
+.loading-content {
+  max-width: 500px;
+}
+
+/* Stage Message */
+.loading-stage-message {
+  font-size: 1.125rem;
+  font-weight: 500;
+  color: #1f2937;
+  margin: 0 0 0.75rem 0;
+  line-height: 1.5;
+}
+
+/* Helper Text */
+.loading-helper-text {
+  font-size: 0.875rem;
+  color: #6b7280;
+  margin: 0;
+  font-style: italic;
+}
+
+/* Screen Reader Only */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .loading-indicator {
+    padding: 2rem 1rem;
+    min-height: 250px;
+  }
+
+  .loading-spinner {
+    width: 50px;
+    height: 50px;
+  }
+
+  .loading-stage-message {
+    font-size: 1rem;
+  }
+
+  .loading-helper-text {
+    font-size: 0.8125rem;
+  }
+}
+
+/* Reduced Motion Support */
+@media (prefers-reduced-motion: reduce) {
+  .loading-spinner {
+    animation: none;
+  }
+
+  .loading-spinner-path {
+    animation: none;
+    stroke-dasharray: 90, 150;
+  }
+}
+
+/* Dark Mode Support (optional) */
+@media (prefers-color-scheme: dark) {
+  .loading-stage-message {
+    color: #f9fafb;
+  }
+
+  .loading-helper-text {
+    color: #9ca3af;
+  }
+
+  .loading-spinner-track {
+    stroke: #374151;
+  }
+
+  .loading-spinner-path {
+    stroke: #60a5fa;
+  }
+}

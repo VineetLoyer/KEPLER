@@ -1,0 +1,315 @@
+/**
+ * ModelVerdicts Component Styles
+ */
+
+.model-verdicts {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Header */
+.model-verdicts-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.model-verdicts-title {
+  font-size: 20px;
+  font-weight: 600;
+  color: #111827;
+  margin: 0;
+}
+
+.model-verdicts-disagreement-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 12px;
+  background-color: #fef3c7;
+  color: #92400e;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  border: 1px solid #fbbf24;
+}
+
+/* Model Verdicts List */
+.model-verdicts-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Individual Model Verdict Card */
+.model-verdict-card {
+  background: #f9fafb;
+  border: 2px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  transition: all 0.2s ease;
+}
+
+.model-verdict-card:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+/* Disagreeing Model - Highlighted */
+.model-verdict-card.model-verdict-disagreeing {
+  border-color: #f59e0b;
+  border-width: 3px;
+  background: #fffbeb;
+  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.1);
+}
+
+.model-verdict-card.model-verdict-disagreeing:hover {
+  box-shadow: 0 2px 8px rgba(245, 158, 11, 0.2);
+}
+
+/* Model Header */
+.model-verdict-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.model-verdict-model-info {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1;
+}
+
+.model-verdict-model-name {
+  font-size: 16px;
+  font-weight: 600;
+  color: #111827;
+  margin: 0;
+}
+
+.model-verdict-disagreement-indicator {
+  display: inline-flex;
+  align-items: center;
+  font-size: 12px;
+  color: #92400e;
+  font-weight: 500;
+  padding: 2px 8px;
+  background-color: #fef3c7;
+  border-radius: 4px;
+  width: fit-content;
+}
+
+/* Verdict Badge - Consistent with VerdictDisplay */
+.model-verdict-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+/* Verdict color classes - same as VerdictDisplay */
+.model-verdict-badge.verdict-supported {
+  background-color: #10b981;
+  color: white;
+}
+
+.model-verdict-badge.verdict-refuted {
+  background-color: #ef4444;
+  color: white;
+}
+
+.model-verdict-badge.verdict-nei {
+  background-color: #f59e0b;
+  color: white;
+}
+
+.model-verdict-badge.verdict-unknown {
+  background-color: #6b7280;
+  color: white;
+}
+
+/* Confidence Section */
+.model-verdict-confidence {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* Justification Section */
+.model-verdict-justification {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.model-verdict-justification-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #374151;
+  margin: 0;
+}
+
+.model-verdict-justification-text {
+  font-size: 14px;
+  line-height: 1.6;
+  color: #4b5563;
+  margin: 0;
+  padding: 12px;
+  background-color: white;
+  border-radius: 6px;
+  border-left: 3px solid #3b82f6;
+}
+
+/* Evidence References Section */
+.model-verdict-evidence {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.model-verdict-evidence-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #374151;
+  margin: 0;
+}
+
+.model-verdict-evidence-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.model-verdict-evidence-item {
+  font-size: 12px;
+  padding: 4px 10px;
+  background-color: #dbeafe;
+  color: #1e40af;
+  border-radius: 4px;
+  font-family: monospace;
+}
+
+/* Summary Section */
+.model-verdicts-summary {
+  padding-top: 16px;
+  border-top: 2px solid #e5e7eb;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.model-verdicts-agreement {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background-color: #f3f4f6;
+  border-radius: 8px;
+}
+
+.model-verdicts-agreement-label {
+  font-size: 14px;
+  font-weight: 500;
+  color: #6b7280;
+}
+
+.model-verdicts-agreement-value {
+  font-size: 18px;
+  font-weight: 700;
+  color: #111827;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .model-verdicts {
+    padding: 16px;
+    gap: 16px;
+  }
+
+  .model-verdicts-title {
+    font-size: 18px;
+  }
+
+  .model-verdicts-disagreement-badge {
+    font-size: 12px;
+    padding: 4px 10px;
+  }
+
+  .model-verdict-card {
+    padding: 16px;
+    gap: 12px;
+  }
+
+  .model-verdict-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .model-verdict-badge {
+    padding: 6px 12px;
+    font-size: 13px;
+    align-self: flex-start;
+  }
+
+  .model-verdict-model-name {
+    font-size: 15px;
+  }
+
+  .model-verdict-justification-text {
+    font-size: 13px;
+    padding: 10px;
+  }
+
+  .model-verdicts-summary {
+    justify-content: center;
+  }
+
+  .model-verdicts-agreement {
+    flex-direction: column;
+    text-align: center;
+    gap: 4px;
+  }
+}
+
+/* Accessibility */
+.model-verdicts:focus-within {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+/* Print styles */
+@media print {
+  .model-verdicts {
+    box-shadow: none;
+    border: 1px solid #e5e7eb;
+  }
+
+  .model-verdict-card {
+    page-break-inside: avoid;
+    box-shadow: none;
+  }
+
+  .model-verdict-badge {
+    box-shadow: none;
+    border: 2px solid currentColor;
+  }
+}

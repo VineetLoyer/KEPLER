@@ -1,0 +1,50 @@
+{
+  "providers": {
+    "openai": {
+      "gpt4o": {
+        "input_per_1k_tokens_usd": 0.0,
+        "output_per_1k_tokens_usd": 0.0,
+        "image_per_image_usd": 0.0
+      },
+      "gpt4o_mini": {
+        "input_per_1k_tokens_usd": 0.0,
+        "output_per_1k_tokens_usd": 0.0,
+        "image_per_image_usd": 0.0
+      }
+    },
+    "anthropic": {
+      "claude35_sonnet": {
+        "input_per_1k_tokens_usd": 0.0,
+        "output_per_1k_tokens_usd": 0.0,
+        "image_per_image_usd": 0.0
+      },
+      "claude35_haiku": {
+        "input_per_1k_tokens_usd": 0.0,
+        "output_per_1k_tokens_usd": 0.0,
+        "image_per_image_usd": 0.0
+      }
+    },
+    "google": {
+      "gemini15_pro": {
+        "input_per_1k_tokens_usd": 0.0,
+        "output_per_1k_tokens_usd": 0.0,
+        "image_per_image_usd": 0.0
+      },
+      "gemini15_flash": {
+        "input_per_1k_tokens_usd": 0.0,
+        "output_per_1k_tokens_usd": 0.0,
+        "image_per_image_usd": 0.0
+      }
+    },
+    "vision": {
+      "azure_vision_read_per_1k": 0.0,
+      "google_vision_per_1k": 0.0
+    },
+    "search": {
+      "google_cse_per_query_usd": 0.0
+    }
+  },
+  "defaults": {
+    "provider": "openai.gpt4o_mini"
+  }
+}

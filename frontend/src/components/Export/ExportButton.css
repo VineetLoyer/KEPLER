@@ -1,0 +1,104 @@
+/**
+ * ExportButton Component Styles
+ */
+
+.export-button-container {
+  position: relative;
+  display: inline-block;
+}
+
+.export-dropdown {
+  position: relative;
+}
+
+.export-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  background-color: #3B82F6;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.export-button:hover:not(:disabled) {
+  background-color: #2563EB;
+}
+
+.export-button:disabled {
+  background-color: #9CA3AF;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.export-arrow {
+  font-size: 10px;
+  transition: transform 0.2s ease;
+}
+
+.export-dropdown-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  margin-top: 4px;
+  background-color: white;
+  border: 1px solid #E5E7EB;
+  border-radius: 6px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  min-width: 180px;
+  z-index: 1000;
+  overflow: hidden;
+}
+
+.export-option {
+  display: block;
+  width: 100%;
+  padding: 12px 16px;
+  background-color: white;
+  color: #111827;
+  border: none;
+  text-align: left;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.export-option:hover {
+  background-color: #F3F4F6;
+}
+
+.export-option:active {
+  background-color: #E5E7EB;
+}
+
+.export-error {
+  margin-top: 8px;
+  padding: 8px 12px;
+  background-color: #FEE2E2;
+  color: #991B1B;
+  border: 1px solid #FCA5A5;
+  border-radius: 4px;
+  font-size: 13px;
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+  .export-button {
+    padding: 8px 16px;
+    font-size: 13px;
+  }
+
+  .export-dropdown-menu {
+    min-width: 160px;
+  }
+
+  .export-option {
+    padding: 10px 14px;
+    font-size: 13px;
+  }
+}

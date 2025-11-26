@@ -1,0 +1,27 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "kepler"
+version = "0.1.0"
+description = "Knowledge Extraction Pipeline for Logical Evidence and Reasoning"
+readme = "README.md"
+requires-python = ">=3.9"
+dependencies = [
+    "python-dateutil>=2.8.2",
+]
+
+[project.optional-dependencies]
+test = [
+    "pytest>=7.4.0",
+    "hypothesis>=6.92.0",
+    "pytest-cov>=4.1.0",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = "-v --cov=src --cov-report=term-missing"

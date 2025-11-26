@@ -1,0 +1,53 @@
+% ===================== ACL-STYLE (requires ACL template files) =====================
+% Use with the official ACL Rolling Review template (Overleaf: https://www.overleaf.com/latex/templates/acl-rolling-review-template/jtqfdbtmcnmw)
+\documentclass[11pt]{article}
+\usepackage[final]{acl} % remove [final] and use [review] for anonymous draft
+\usepackage{times}
+\usepackage{latexsym}
+\usepackage{inconsolata}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{amsmath,amssymb}
+\usepackage{enumitem}
+\usepackage{hyperref}
+\usepackage{xcolor}
+
+\title{KEPLER: Knowledge Extraction Pipeline for Logical Evidence and Reasoning}
+
+\author{
+  Vineet Loyer, Vedant Bhenia, Prem Doshi, Aayush Sasharabuddhe, Didonehal Gowda, Shamna Adoor \\  
+  University of Southern California \\
+  \texttt{[vloyer, bhenia, pdoshi, aayush, dnanjego, adoor]@usc.edu}
+}
+
+\begin{document}
+\maketitle
+
+\section{Motivation}
+Misinformation spreads rapidly across text and images, eroding trust in public discourse. Manual fact-checking cannot scale to the volume and velocity of claims; automated approaches typically focus on single modalities, rely on fixed corpora, or lack transparent justifications. \textbf{KEPLER} addresses these gaps through a real-time, multimodal pipeline that couples robust evidence retrieval with logical, multi-hop reasoning and confidence-rated verdicts for end users (journalists, researchers, platforms).
+
+\section{Related Work}
+Early pipelines (e.g., FEVER) emphasize text-only verification; multi-hop datasets (e.g., HOVER) advance reasoning, yet most systems remain limited to fixed text corpora. Multimodal LLMs (e.g., GPT-4o, LLaVA) enable image+text comprehension but have not been systematically integrated into end-to-end fact-checking with uncertainty and justification. KEPLER contributes a cross-modal, model-agnostic backbone with iterative retrieval and explicit confidence estimation.
+
+\section{Proposed Methods and Experiments}
+\paragraph{Pipeline.} (1) \emph{Input Handler \& Claim Detection Agent} Accepts both text and image inputs. Utilizes user-selected multimodal LLMs, allowing the use of one or multiple models (e.g., GPT-4o, Gemini, Claude) to parse and identify distinct, verifiable factual claims for further verification. (2) \emph{Retriever Agent} Designs tailored evidence search strategies based on claim modality. Calls APIs (Google Search, GeoClip, Vision) to collect fresh, relevant content from unbiased sources. (3) \emph{Reranker Agent} Filters and prioritizes retrieved evidence. Orders are sourced by relevance, credibility, and recency to ensure only the strongest and most pertinent facts move forward. (4) \emph{Aggregator Agent} Synthesizes multi-modal evidence by integrating text, images, and metadata. It applies chain-of-thought reasoning and highlights agreements, conflicts, and missing information. (5) \emph{Verifier Agent} Evaluates the aggregated evidence for each claim. Assigns verdicts (Supported, Refuted, Misleading, Not Enough Information), with iterative evidence expansion for uncertain cases. (6) \emph{Weighted Multi-Model Output} When multiple LLMs are selected, their individual verdicts, explanations, and confidence scores are aggregated using a dynamic weighting system. This ensures robust, balanced fact-checking decisions, capitalizing on the strengths and diversity of each model. (7) \emph{Confidence Scorer} Rates verdict certainty by considering source reliability, cross-model agreement, and evidence recency. Presents confidence scores and structured, source-linked justifications.
+
+\paragraph {Experiments.} Benchmark performance on standard datasets (FEVER, HOVER, AVeriTeC, MOCHEG, VERITE, PUBHEALTH), measuring claim-level accuracy, precision, recall, F1, and explanation quality (BLEU, METEOR, ROUGE).
+
+\paragraph{Metrics.} Assess calibration using Brier Score and Expected Calibration Error.
+
+\section{Plan and Milestones}
+\begin{itemize}[leftmargin=1em]
+  \item \textbf{Weeks 1--4:}Input Handler & Claim Detection, Retriever Agent, Reranker Agent, Aggregator Agent  
+  \item \textbf{Week 5:} Project Status Report 
+  \item \textbf{Weeks 6--9:} Verifier Agent, Weighted Multi-Model Output, Confidence Scorer 
+  \item \textbf{Week 9+:} Presentation and Report Submission  
+  
+\end{itemize}
+
+
+\bibliographystyle{acl_natbib}
+\bibliography{kepler_refs}
+
+\end{document}

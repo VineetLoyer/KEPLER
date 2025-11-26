@@ -1,0 +1,27 @@
+{
+  "api": {
+    "openai_api_key": "your-openai-api-key-here",
+    "anthropic_api_key": "your-anthropic-api-key-here",
+    "google_search_api_key": "your-google-search-api-key-here",
+    "google_search_engine_id": "your-google-search-engine-id-here",
+    "bing_search_api_key": "your-bing-search-api-key-here",
+    "google_vision_api_key": "your-google-vision-api-key-here"
+  },
+  "system": {
+    "max_search_results": 10,
+    "max_evidence_pieces": 20,
+    "relevance_threshold": 0.3,
+    "credibility_threshold": 0.2,
+    "rank_threshold": 0.4,
+    "unknown_domain_credibility": 0.5,
+    "min_property_test_iterations": 100,
+    "fact_checking_domains": [
+      "snopes.com",
+      "politifact.com",
+      "factcheck.org",
+      "fullfact.org",
+      "checkyourfact.com"
+    ],
+    "restricted_domains": []
+  }
+}

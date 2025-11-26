@@ -1,0 +1,73 @@
+/**
+ * ConfidenceBar Component Styles
+ */
+
+.confidence-bar-container {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+}
+
+.confidence-bar-label {
+  font-size: 14px;
+  font-weight: 500;
+  color: #374151;
+  min-width: 80px;
+}
+
+.confidence-bar-track {
+  flex: 1;
+  height: 12px;
+  background-color: #e5e7eb;
+  border-radius: 6px;
+  overflow: hidden;
+  position: relative;
+}
+
+.confidence-bar-fill {
+  height: 100%;
+  border-radius: 6px;
+  transition: width 0.3s ease, background-color 0.3s ease;
+}
+
+.confidence-bar-fill.confidence-high {
+  background-color: #10b981; /* Green */
+}
+
+.confidence-bar-fill.confidence-medium {
+  background-color: #f59e0b; /* Amber */
+}
+
+.confidence-bar-fill.confidence-low {
+  background-color: #ef4444; /* Red */
+}
+
+.confidence-bar-percentage {
+  font-size: 14px;
+  font-weight: 600;
+  color: #111827;
+  min-width: 45px;
+  text-align: right;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .confidence-bar-container {
+    gap: 8px;
+  }
+
+  .confidence-bar-label {
+    font-size: 13px;
+    min-width: 70px;
+  }
+
+  .confidence-bar-track {
+    height: 10px;
+  }
+
+  .confidence-bar-percentage {
+    font-size: 13px;
+    min-width: 40px;
+  }
+}

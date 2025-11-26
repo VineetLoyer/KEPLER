@@ -1,0 +1,318 @@
+/**
+ * AtomicClaims Component Styles
+ */
+
+.atomic-claims {
+  background: #ffffff;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 24px;
+  margin: 16px 0;
+}
+
+.atomic-claims-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin: 0 0 20px 0;
+}
+
+/* Overall verdict section for compound claims */
+.atomic-claims-overall {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  background: #f8f9fa;
+  border-radius: 6px;
+  margin-bottom: 20px;
+}
+
+.atomic-claims-overall-label {
+  font-weight: 600;
+  color: #495057;
+}
+
+.atomic-claims-overall-verdict {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+.atomic-claims-overall-icon {
+  font-size: 1.2rem;
+}
+
+/* Verdict color classes */
+.atomic-claims-overall-verdict.verdict-supported {
+  background: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
+
+.atomic-claims-overall-verdict.verdict-refuted {
+  background: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+}
+
+.atomic-claims-overall-verdict.verdict-nei {
+  background: #fff3cd;
+  color: #856404;
+  border: 1px solid #ffeaa7;
+}
+
+/* Claims list */
+.atomic-claims-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Individual claim item */
+.atomic-claim-item {
+  border: 1px solid #dee2e6;
+  border-radius: 6px;
+  overflow: hidden;
+  transition: box-shadow 0.2s ease;
+}
+
+.atomic-claim-item:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Claim header (clickable) */
+.atomic-claim-header {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px;
+  background: #ffffff;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  transition: background-color 0.2s ease;
+}
+
+.atomic-claim-header:hover {
+  background: #f8f9fa;
+}
+
+.atomic-claim-header:focus {
+  outline: 2px solid #007bff;
+  outline-offset: -2px;
+}
+
+.atomic-claim-header-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+}
+
+/* Status icon */
+.atomic-claim-status-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  font-size: 1.2rem;
+  font-weight: bold;
+  flex-shrink: 0;
+}
+
+.atomic-claim-status-icon.verdict-supported {
+  background: #d4edda;
+  color: #155724;
+}
+
+.atomic-claim-status-icon.verdict-refuted {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+.atomic-claim-status-icon.verdict-nei {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.atomic-claim-status-icon.status-pending {
+  background: #e9ecef;
+  color: #6c757d;
+}
+
+/* Claim text */
+.atomic-claim-text {
+  flex: 1;
+  font-size: 1rem;
+  color: #212529;
+  line-height: 1.5;
+}
+
+/* Status badge */
+.atomic-claim-status-badge {
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.atomic-claim-status-badge.verdict-supported {
+  background: #d4edda;
+  color: #155724;
+}
+
+.atomic-claim-status-badge.verdict-refuted {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+.atomic-claim-status-badge.verdict-nei {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.atomic-claim-status-badge.status-pending {
+  background: #e9ecef;
+  color: #6c757d;
+}
+
+/* Expand icon */
+.atomic-claim-expand-icon {
+  font-size: 0.875rem;
+  color: #6c757d;
+  transition: transform 0.2s ease;
+  flex-shrink: 0;
+  margin-left: 8px;
+}
+
+.atomic-claim-expand-icon.expanded {
+  transform: rotate(180deg);
+}
+
+/* Claim details (expanded content) */
+.atomic-claim-details {
+  padding: 20px;
+  background: #f8f9fa;
+  border-top: 1px solid #dee2e6;
+  animation: slideDown 0.2s ease;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    max-height: 0;
+  }
+  to {
+    opacity: 1;
+    max-height: 500px;
+  }
+}
+
+.atomic-claim-detail-section {
+  margin-bottom: 20px;
+}
+
+.atomic-claim-detail-section:last-child {
+  margin-bottom: 0;
+}
+
+.atomic-claim-detail-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #495057;
+  margin: 0 0 12px 0;
+}
+
+.atomic-claim-detail-item {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+  font-size: 0.9375rem;
+}
+
+.atomic-claim-detail-item.atomic-claim-justification {
+  flex-direction: column;
+}
+
+.atomic-claim-detail-label {
+  font-weight: 600;
+  color: #6c757d;
+  min-width: 120px;
+}
+
+.atomic-claim-detail-value {
+  color: #212529;
+  flex: 1;
+}
+
+.atomic-claim-detail-value.verdict-supported {
+  color: #155724;
+  font-weight: 600;
+}
+
+.atomic-claim-detail-value.verdict-refuted {
+  color: #721c24;
+  font-weight: 600;
+}
+
+.atomic-claim-detail-value.verdict-nei {
+  color: #856404;
+  font-weight: 600;
+}
+
+/* Info message */
+.atomic-claims-info {
+  margin-top: 20px;
+  padding: 12px 16px;
+  background: #e7f3ff;
+  border-left: 4px solid #007bff;
+  border-radius: 4px;
+}
+
+.atomic-claims-info p {
+  margin: 0;
+  color: #004085;
+  font-size: 0.9375rem;
+  line-height: 1.5;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .atomic-claims {
+    padding: 16px;
+  }
+
+  .atomic-claims-title {
+    font-size: 1.25rem;
+  }
+
+  .atomic-claim-header-content {
+    flex-wrap: wrap;
+  }
+
+  .atomic-claim-text {
+    font-size: 0.9375rem;
+  }
+
+  .atomic-claim-status-badge {
+    font-size: 0.8125rem;
+  }
+
+  .atomic-claim-detail-item {
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .atomic-claim-detail-label {
+    min-width: auto;
+  }
+}
