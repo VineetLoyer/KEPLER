@@ -443,9 +443,12 @@ function App() {
               confidenceScore={results.confidenceScore as any}
             />
 
-            {results.confidenceScore && (results.confidenceScore as any).structured_justification?.source_links?.length > 0 && (
+            {results.confidenceScore && 
+             (results.confidenceScore as any).structured_justification?.key_evidence && 
+             Array.isArray((results.confidenceScore as any).structured_justification.key_evidence) &&
+             (results.confidenceScore as any).structured_justification.key_evidence.length > 0 && (
               <EvidencePanel
-                evidence={(results.confidenceScore as any).structured_justification.source_links}
+                evidence={(results.confidenceScore as any).structured_justification.key_evidence}
               />
             )}
 
@@ -455,15 +458,20 @@ function App() {
               />
             )}
 
-            {results.consensusVerdict && (results.consensusVerdict as any).individual_verdicts?.length > 0 && (
+            {results.consensusVerdict && 
+             (results.consensusVerdict as any).individual_verdicts && 
+             Array.isArray((results.consensusVerdict as any).individual_verdicts) &&
+             (results.consensusVerdict as any).individual_verdicts.length > 0 && (
               <ModelVerdicts
-                verdicts={(results.consensusVerdict as any).individual_verdicts}
+                consensusVerdict={results.consensusVerdict as any}
               />
             )}
 
-            {results.atomicClaims && results.atomicClaims.length > 0 && (
+            {results.atomicClaims && 
+             Array.isArray(results.atomicClaims) && 
+             results.atomicClaims.length > 0 && (
               <AtomicClaims
-                claims={results.atomicClaims as any}
+                atomicClaims={results.atomicClaims as any}
               />
             )}
 

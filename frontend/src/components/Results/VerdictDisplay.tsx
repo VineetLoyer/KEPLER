@@ -12,7 +12,7 @@
  */
 
 import React from 'react';
-import { ConsensusVerdict, ConfidenceScore } from '../../types/verification';
+import type { ConsensusVerdict, ConfidenceScore } from '../../types/verification';
 import { ConfidenceBar } from '../Common/ConfidenceBar';
 import { formatPercentage, getVerdictColorClass } from '../../utils/formatting';
 import './VerdictDisplay.css';

@@ -21,7 +21,7 @@ class RerankerAgent:
     
     # Known domain credibility database
     DOMAIN_CREDIBILITY_DB: Dict[str, float] = {
-        # Tier 1: Academic and peer-reviewed
+        # Tier 1: Academic, peer-reviewed, and encyclopedic
         'arxiv.org': 0.95,
         'nature.com': 0.98,
         'science.org': 0.98,
@@ -29,6 +29,13 @@ class RerankerAgent:
         'acm.org': 0.95,
         'springer.com': 0.92,
         'sciencedirect.com': 0.92,
+        'wikipedia.org': 0.88,  # High credibility for factual claims
+        'britannica.com': 0.90,
+        'nasa.gov': 0.98,
+        'nih.gov': 0.95,
+        'cdc.gov': 0.95,
+        'gov': 0.85,  # General government domains
+        'edu': 0.82,  # General educational domains
         
         # Tier 2: Verified news sources
         'reuters.com': 0.85,
@@ -46,12 +53,22 @@ class RerankerAgent:
         'forbes.com': 0.65,
         'techcrunch.com': 0.60,
         
-        # Tier 4: Blogs and social media
+        # Tier 4: Blogs, forums, and social media
         'medium.com': 0.35,
         'blogger.com': 0.30,
         'wordpress.com': 0.30,
-        'twitter.com': 0.25,
-        'facebook.com': 0.20,
+        'reddit.com': 0.25,
+        'twitter.com': 0.20,
+        'facebook.com': 0.15,
+        
+        # Tier 5: Low credibility - satire, jokes, unreliable
+        'theonion.com': 0.05,  # Satire
+        'clickhole.com': 0.05,  # Satire
+        'reasons.org': 0.15,  # Advocacy/apologetics site
+        'cheeseprofessor.com': 0.20,  # Blog
+        'snackstack.net': 0.20,  # Blog
+        'mentalfloss.com': 0.40,  # Entertainment/trivia
+        'smartdoll.jp': 0.10,  # E-commerce
     }
     
     # Domain credibility factors database (for historical analysis)
@@ -186,11 +203,46 @@ class RerankerAgent:
         elif domain in self.DOMAIN_CREDIBILITY_DB:
             base_credibility = self.DOMAIN_CREDIBILITY_DB[domain]
         else:
-            # Unknown domain: use neutral default (conservative approach)
-            base_credibility = 0.5
+            # Unknown domain: infer credibility from TLD and patterns
+            base_credibility = self._infer_domain_credibility(domain)
         
         # Ensure score is in [0, 1]
         return min(1.0, max(0.0, base_credibility))
+    
+    def _infer_domain_credibility(self, domain: str) -> float:
+        """Infer credibility for unknown domains based on TLD and patterns
+        
+        Args:
+            domain: Domain name to analyze
+            
+        Returns:
+            Inferred credibility score
+        """
+        # Check for high-credibility TLDs
+        if domain.endswith('.gov'):
+            return 0.85
+        if domain.endswith('.edu'):
+            return 0.82
+        if domain.endswith('.ac.uk') or domain.endswith('.edu.au'):
+            return 0.82
+        
+        # Check for low-credibility indicators
+        low_cred_keywords = ['blog', 'wordpress', 'blogspot', 'tumblr', 'wix', 'weebly']
+        if any(keyword in domain for keyword in low_cred_keywords):
+            return 0.30
+        
+        # Check for social media patterns
+        social_keywords = ['facebook', 'twitter', 'instagram', 'tiktok', 'reddit']
+        if any(keyword in domain for keyword in social_keywords):
+            return 0.20
+        
+        # Check for commercial/shop indicators (lower credibility for facts)
+        shop_keywords = ['shop', 'store', 'buy', 'sell', 'market']
+        if any(keyword in domain for keyword in shop_keywords):
+            return 0.25
+        
+        # Default for unknown domains: slightly below neutral (conservative)
+        return 0.40
     
     def calculate_recency_score(
         self,

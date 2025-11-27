@@ -13,7 +13,7 @@
  */
 
 import React from 'react';
-import { ConsensusVerdict, Verdict } from '../../types/verification';
+import type { ConsensusVerdict, Verdict } from '../../types/verification';
 import { ConfidenceBar } from '../Common/ConfidenceBar';
 import { formatPercentage, getVerdictColorClass } from '../../utils/formatting';
 import './ModelVerdicts.css';

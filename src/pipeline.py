@@ -26,8 +26,30 @@ from src.agents.verifier_agent import VerifierAgent
 from src.agents.multi_model_aggregator import MultiModelAggregator
 from src.agents.confidence_scorer import ConfidenceScorer
 from src.utils.retry import retry_with_exponential_backoff, RetryExhaustedError
+from src.config import config
 
 logger = logging.getLogger(__name__)
+
+
+def create_retriever_agent() -> RetrieverAgent:
+    """Create retriever agent with real search client if API keys are available"""
+    search_client = None
+    scraper_client = None
+    
+    # Try to use real Google Search if API keys are available
+    if config.api.google_search_api_key and config.api.google_search_engine_id:
+        try:
+            from src.utils.google_search_client import GoogleSearchClient
+            from src.utils.web_scraper import WebScraper
+            search_client = GoogleSearchClient()
+            scraper_client = WebScraper()
+            logger.info("Using real Google Search API for evidence retrieval")
+        except Exception as e:
+            logger.warning(f"Failed to initialize Google Search client: {e}. Using mock client.")
+    else:
+        logger.warning("Google Search API keys not configured. Using mock search client.")
+    
+    return RetrieverAgent(search_client=search_client, scraper_client=scraper_client)
 
 
 class PipelineOrchestrator:
@@ -55,7 +77,7 @@ class PipelineOrchestrator:
             confidence_scorer: Confidence scorer (creates default if None)
         """
         self.claim_decomposer = claim_decomposer or ClaimDecompositionAgent()
-        self.retriever = retriever or RetrieverAgent()
+        self.retriever = retriever or create_retriever_agent()
         self.reranker = reranker or RerankerAgent()
         self.aggregator = aggregator or AggregatorAgent()
         self.verifier = verifier or VerifierAgent()
@@ -176,46 +198,83 @@ class PipelineOrchestrator:
                 
                 return final_output
             
-            # For simplicity, process the first atomic claim
-            # In production, this would process all claims
-            claim = atomic_claims[0]
+            # Process each atomic claim independently
+            all_evidence_pieces = []
+            all_ranked_evidence = []
+            claim_verdicts = {}  # Map claim_id to verdict
             
-            # Stage 3: Evidence Retrieval
-            evidence_pieces = self._retrieve_evidence(
-                claim,
-                multimodal_input.timestamp,
-                multimodal_input.image is not None,
-                multimodal_input.image,
-            )
+            for claim in atomic_claims:
+                logger.info(f"Processing atomic claim: {claim.id}")
+                
+                # Stage 3: Evidence Retrieval (per claim)
+                evidence_pieces = self._retrieve_evidence(
+                    claim,
+                    multimodal_input.timestamp,
+                    multimodal_input.image is not None,
+                    multimodal_input.image,
+                )
+                all_evidence_pieces.extend(evidence_pieces)
+                
+                # Stage 4: Evidence Reranking (per claim)
+                ranked_evidence = self._rerank_evidence(evidence_pieces, claim)
+                all_ranked_evidence.extend(ranked_evidence)
+                
+                # Stage 5: Evidence Aggregation (per claim)
+                consolidated_evidence = self._aggregate_evidence(ranked_evidence, claim)
+                
+                # Stage 6: Verification (per claim)
+                claim_verdict = self._verify_claim(
+                    claim,
+                    consolidated_evidence,
+                    multimodal_input.selected_llms,
+                )
+                
+                # Store verdict for this claim
+                claim_verdicts[claim.id] = claim_verdict
+                
+                # Update the claim's verification status
+                claim.verification_status = claim_verdict.final_classification
+                
+                logger.info(f"Claim {claim.id} verdict: {claim_verdict.final_classification.value}")
             
-            # Stage 4: Evidence Reranking
-            ranked_evidence = self._rerank_evidence(evidence_pieces, claim)
+            # Stage 7: Aggregate all claim verdicts into overall consensus
+            # Use the first claim's verdict as the primary one for now
+            # In a more sophisticated system, you'd aggregate across all claims
+            primary_claim = atomic_claims[0]
+            consensus_verdict = claim_verdicts[primary_claim.id]
             
-            # Stage 5: Evidence Aggregation
-            consolidated_evidence = self._aggregate_evidence(ranked_evidence, claim)
+            # Use evidence from all claims for confidence scoring
+            # Aggregate reasoning chains from all claims
+            all_reasoning_chains = []
+            for claim in atomic_claims:
+                claim_evidence = [e for e in all_ranked_evidence if claim.text.lower() in e.summary.lower()]
+                if claim_evidence:
+                    consolidated = self._aggregate_evidence(claim_evidence, claim)
+                    if consolidated.reasoning_chain:
+                        all_reasoning_chains.append(consolidated.reasoning_chain)
             
-            # Stage 6: Verification
-            consensus_verdict = self._verify_claim(
-                claim,
-                consolidated_evidence,
-                multimodal_input.selected_llms,
-            )
+            # Use the first reasoning chain or create empty one
+            primary_reasoning_chain = all_reasoning_chains[0] if all_reasoning_chains else None
+            if primary_reasoning_chain is None:
+                from src.models.data_models import ReasoningChain
+                primary_reasoning_chain = ReasoningChain(steps=[], agreements=[], conflicts=[], gaps=[])
             
-            # Stage 7: Confidence Scoring
+            # Stage 8: Confidence Scoring (using all evidence)
             confidence_score = self._calculate_confidence(
                 consensus_verdict,
-                ranked_evidence,
-                consolidated_evidence.reasoning_chain,
+                all_ranked_evidence,
+                primary_reasoning_chain,
             )
             
             # Create processing metadata
             processing_metadata = {
                 "pipeline_version": "1.0",
-                "total_stages": 7,
+                "total_stages": 8,
                 "processing_time_ms": self._calculate_total_time(),
                 "num_atomic_claims": len(atomic_claims),
-                "num_evidence_pieces": len(evidence_pieces),
-                "num_ranked_evidence": len(ranked_evidence),
+                "num_evidence_pieces": len(all_evidence_pieces),
+                "num_ranked_evidence": len(all_ranked_evidence),
+                "per_claim_verification": True,
             }
             
             # Create final output

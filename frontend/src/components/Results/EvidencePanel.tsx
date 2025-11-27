@@ -13,7 +13,7 @@
  */
 
 import React from 'react';
-import { EvidencePiece } from '../../types/verification';
+import type { EvidencePiece } from '../../types/verification';
 import { formatPercentage } from '../../utils/formatting';
 import './EvidencePanel.css';
 

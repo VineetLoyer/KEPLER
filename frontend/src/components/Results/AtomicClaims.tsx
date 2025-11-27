@@ -13,7 +13,7 @@
  */
 
 import React, { useState } from 'react';
-import { AtomicClaim, VerdictType, VerificationResult } from '../../types/verification';
+import type { AtomicClaim, VerdictType, VerificationResult } from '../../types/verification';
 import { getVerdictColorClass } from '../../utils/formatting';
 import './AtomicClaims.css';
 

@@ -14,7 +14,7 @@
  */
 
 import React from 'react';
-import { ReasoningChain as ReasoningChainType } from '../../types/verification';
+import type { ReasoningChain as ReasoningChainType } from '../../types/verification';
 import { formatPercentage } from '../../utils/formatting';
 import './ReasoningChain.css';
 

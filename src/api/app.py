@@ -60,6 +60,17 @@ def create_app(settings: APISettings = None) -> FastAPI:
     app.include_router(verification.router, prefix="/api", tags=["verification"])
     app.include_router(models.router, prefix="/api", tags=["models"])
     
+    # Root endpoint
+    @app.get("/", tags=["root"])
+    async def root():
+        """Root endpoint - redirects to API documentation"""
+        return {
+            "message": "KEPLER API",
+            "version": "1.0.0",
+            "docs": "/api/docs",
+            "health": "/api/health"
+        }
+    
     # Store settings in app state
     app.state.settings = settings
     
