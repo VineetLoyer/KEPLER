@@ -250,17 +250,32 @@ Textual Evidence:
             prompt += f"\nSources: {len(context['metadata'])} sources analyzed\n"
         
         prompt += """
-Analyze the evidence and determine if the claim is:
-- Supported: Evidence strongly confirms the claim
-- Refuted: Evidence strongly contradicts the claim
-- Not Enough Information: Evidence is insufficient or inconclusive
+Your task is to fact-check this claim using the provided evidence.
 
-Provide your verdict and a detailed justification referencing specific evidence.
+IMPORTANT INSTRUCTIONS:
+1. **Check for CONTRADICTIONS**: If the evidence states a DIFFERENT value/fact than the claim, the verdict is REFUTED.
+   Example: Claim says "600 meters" but evidence says "324 meters" → REFUTED
+   
+2. **Check for CONFIRMATION**: If the evidence confirms the exact claim → SUPPORTED
+
+3. **Check for INSUFFICIENCY**: Only use "Not Enough Information" if:
+   - No relevant evidence found
+   - Evidence is ambiguous or unclear
+   - Evidence doesn't address the claim
+   
+DO NOT use "Not Enough Information" when evidence clearly contradicts the claim!
+
+Analyze the evidence and determine the verdict:
+- **SUPPORTED**: Evidence confirms the claim is TRUE
+- **REFUTED**: Evidence proves the claim is FALSE or contradicts it
+- **NOT ENOUGH INFORMATION**: Evidence is insufficient, unclear, or missing
+
+Provide your verdict with detailed justification referencing specific evidence.
 
 Format your response as:
 VERDICT: [Supported/Refuted/Not Enough Information]
 CONFIDENCE: [0.0-1.0]
-JUSTIFICATION: [Your detailed reasoning]
+JUSTIFICATION: [Your detailed reasoning with specific evidence references]
 """
         
         return prompt
