@@ -7,6 +7,10 @@ independently verified.
 from typing import List, Optional, Protocol
 from src.models.data_models import AtomicClaim, LLM
 import uuid
+import logging
+import os
+
+logger = logging.getLogger(__name__)
 
 
 class LLMClient(Protocol):
@@ -29,15 +33,21 @@ An atomic claim is:
 - Contains only one factual assertion
 - Preserves the original meaning and context
 
-Given the following text, extract all atomic claims. If the text contains a compound claim (multiple factual statements), break it down into separate atomic claims.
+IMPORTANT: Keep lists of people, places, or things together as a single claim. For example:
+- "X was founded by A, B, and C" is ONE claim (keep founders together)
+- "X happened in 1990, and Y happened in 2000" is TWO claims (different events)
+
+Given the following text, extract all atomic claims. If the text contains a compound claim (multiple independent factual statements), break it down into separate atomic claims.
 
 Text: {text}
 
 Instructions:
 1. Identify each distinct factual statement
-2. Ensure each claim is self-contained and independently verifiable
-3. Preserve the original meaning without adding new information
-4. If the text is already atomic, return it as a single claim
+2. Keep lists (people, places, things) together in one claim
+3. Split only when there are truly independent facts
+4. Ensure each claim is self-contained and independently verifiable
+5. Preserve the original meaning without adding new information
+6. If the text is already atomic, return it as a single claim
 
 Format your response as a numbered list, with one claim per line:
 1. [First atomic claim]
@@ -52,9 +62,27 @@ If the text contains no factual claims, respond with "NO_CLAIMS".
         
         Args:
             llm_client: Optional LLM client for making API calls.
-                       If None, uses a mock client for testing.
+                       If None, tries to use real LLM client if API keys are available,
+                       otherwise falls back to mock client.
         """
-        self.llm_client = llm_client or MockLLMClient()
+        if llm_client is not None:
+            self.llm_client = llm_client
+        else:
+            # Try to use real LLM client if API keys are available
+            openai_key = os.getenv("OPENAI_API_KEY")
+            anthropic_key = os.getenv("ANTHROPIC_API_KEY")
+            
+            if openai_key or anthropic_key:
+                try:
+                    from src.utils.llm_client import RealLLMClient
+                    self.llm_client = RealLLMClient(openai_key, anthropic_key)
+                    logger.info("Using real LLM client for claim decomposition")
+                except Exception as e:
+                    logger.warning(f"Failed to initialize real LLM client: {e}. Using mock.")
+                    self.llm_client = MockLLMClient()
+            else:
+                logger.warning("No LLM API keys found. Using mock LLM client.")
+                self.llm_client = MockLLMClient()
     
     def decompose(self, text: str, model: LLM) -> List[AtomicClaim]:
         """Decompose input text into atomic claims
@@ -221,23 +249,69 @@ class MockLLMClient:
         # This is a very basic decomposition for testing purposes
         claims = []
         
-        # Split on sentence boundaries
-        sentences = re.split(r'[.!?]+\s+', text)
+        # Split on sentence boundaries, but avoid common abbreviations
+        # Look for period followed by space and capital letter (but not Inc., Dr., etc.)
+        # For simplicity, just look for period at end of text or period followed by space and capital
+        # that's not part of common abbreviations
+        sentences = []
+        
+        # Simple approach: split on ". " but rejoin if it's a known abbreviation
+        temp_sentences = text.split('. ')
+        current_sentence = ""
+        
+        for i, part in enumerate(temp_sentences):
+            current_sentence += part
+            
+            # Check if this part ends with a common abbreviation
+            is_abbreviation = any(current_sentence.endswith(abbr) for abbr in 
+                                 ['Inc', 'Corp', 'Ltd', 'Dr', 'Mr', 'Mrs', 'Ms', 'Prof', 'Sr', 'Jr'])
+            
+            if is_abbreviation and i < len(temp_sentences) - 1:
+                # This is an abbreviation, keep the period and continue
+                current_sentence += '. '
+            else:
+                # This is a real sentence boundary
+                if current_sentence.strip():
+                    sentences.append(current_sentence.strip())
+                current_sentence = ""
         
         for sentence in sentences:
             sentence = sentence.strip()
             if not sentence:
                 continue
             
-            # Further split on "and" if it connects independent clauses
-            # This is a simplification - real LLM would be more sophisticated
-            if ' and ' in sentence.lower():
-                parts = sentence.split(' and ')
-                for part in parts:
-                    part = part.strip()
-                    if part and len(part) > 10:  # Avoid very short fragments
-                        claims.append(part)
+            # Look for ", and" pattern which typically connects independent clauses
+            # This avoids splitting lists like "A, B, and C"
+            # Strategy: Look specifically for ", and" followed by a pronoun (strongest indicator)
+            if ', and ' in sentence.lower():
+                # Find all positions of ", and"
+                import re
+                pattern = r',\s+and\s+(it|he|she|they|we|i)\s+'
+                match = re.search(pattern, sentence, flags=re.IGNORECASE)
+                
+                if match:
+                    # Found ", and [pronoun]" - this is very likely an independent clause
+                    split_pos = match.start()
+                    
+                    part1 = sentence[:split_pos].strip()
+                    part2 = sentence[split_pos + 1:].strip()  # +1 to skip the comma
+                    
+                    # Remove "and " from start of part2
+                    if part2.lower().startswith('and '):
+                        part2 = part2[4:].strip()
+                    
+                    # Only split if both parts are substantial
+                    if len(part1) > 15 and len(part2) > 15:
+                        claims.append(part1)
+                        claims.append(part2)
+                    else:
+                        claims.append(sentence)
+                else:
+                    # No ", and [pronoun]" found, keep together
+                    # This handles lists like "A, B, and C"
+                    claims.append(sentence)
             else:
+                # No ", and" pattern, keep as single claim
                 claims.append(sentence)
         
         if not claims:

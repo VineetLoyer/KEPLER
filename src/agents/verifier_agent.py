@@ -6,7 +6,9 @@ evidence, and metadata.
 """
 import asyncio
 import time
-from typing import List, Dict, Any
+import os
+import logging
+from typing import List, Dict, Any, Optional
 from src.models.data_models import (
     AtomicClaim,
     ConsolidatedEvidence,
@@ -15,18 +17,42 @@ from src.models.data_models import (
     LLM,
 )
 
+logger = logging.getLogger(__name__)
+
 
 class VerifierAgent:
     """Agent responsible for generating verdicts using multiple LLMs in parallel"""
     
-    def __init__(self, parallel_threshold_ms: float = 100.0):
+    def __init__(self, parallel_threshold_ms: float = 100.0, llm_client: Optional[Any] = None):
         """Initialize the Verifier Agent
         
         Args:
             parallel_threshold_ms: Maximum time difference (in ms) between model 
                                    invocations to be considered parallel
+            llm_client: Optional LLM client for making API calls.
+                       If None, tries to use real LLM client if API keys are available.
         """
         self.parallel_threshold_ms = parallel_threshold_ms
+        
+        # Initialize LLM client
+        if llm_client is not None:
+            self.llm_client = llm_client
+        else:
+            # Try to use real LLM client if API keys are available
+            openai_key = os.getenv("OPENAI_API_KEY")
+            anthropic_key = os.getenv("ANTHROPIC_API_KEY")
+            
+            if openai_key or anthropic_key:
+                try:
+                    from src.utils.llm_client import RealLLMClient
+                    self.llm_client = RealLLMClient(openai_key, anthropic_key)
+                    logger.info("Using real LLM client for verification")
+                except Exception as e:
+                    logger.warning(f"Failed to initialize real LLM client: {e}. Using mock.")
+                    self.llm_client = None
+            else:
+                logger.warning("No LLM API keys found. Using mock verification.")
+                self.llm_client = None
     
     def verify_with_ensemble(
         self,
@@ -247,9 +273,6 @@ JUSTIFICATION: [Your detailed reasoning]
     ) -> str:
         """Call the LLM API to get a verification response
         
-        In a real implementation, this would make an actual API call.
-        For now, we simulate a response based on the context.
-        
         Args:
             model: LLM to call
             prompt: Verification prompt
@@ -258,11 +281,20 @@ JUSTIFICATION: [Your detailed reasoning]
         Returns:
             LLM response string
         """
-        # Simulate LLM response based on evidence
-        # In production, this would call the actual API
+        # Use real LLM if available
+        if self.llm_client is not None:
+            try:
+                logger.info(f"Calling real LLM: {model.provider}/{model.model_id}")
+                response = self.llm_client.generate(prompt, model)
+                return response
+            except Exception as e:
+                logger.error(f"LLM API call failed: {e}. Falling back to mock.")
+                # Fall through to mock implementation
+        
+        # Mock implementation (fallback)
+        logger.warning(f"Using mock verification for {model.model_id}")
         
         # Simple heuristic: if we have evidence, lean towards Supported
-        # This is just for testing purposes
         if len(context['textual_evidence']) > 2:
             verdict = "Supported"
             confidence = 0.8
