@@ -21,7 +21,7 @@ class RerankerAgent:
     
     # Known domain credibility database
     DOMAIN_CREDIBILITY_DB: Dict[str, float] = {
-        # Tier 1: Academic, peer-reviewed, and encyclopedic
+        # Tier 1: Academic, peer-reviewed, and encyclopedic (0.88-0.98)
         'arxiv.org': 0.95,
         'nature.com': 0.98,
         'science.org': 0.98,
@@ -30,40 +30,81 @@ class RerankerAgent:
         'springer.com': 0.92,
         'sciencedirect.com': 0.92,
         'wikipedia.org': 0.88,  # High credibility for factual claims
+        'en.wikipedia.org': 0.88,
         'britannica.com': 0.90,
         'nasa.gov': 0.98,
         'nih.gov': 0.95,
         'cdc.gov': 0.95,
+        'who.int': 0.95,
+        'un.org': 0.90,
+        
+        # Official/Authoritative sources (0.85-0.95)
+        'toureiffel.paris': 0.92,  # Official Eiffel Tower site
+        'louvre.fr': 0.92,  # Official Louvre site
+        'whitehouse.gov': 0.90,
+        'europa.eu': 0.90,
+        'gov.uk': 0.88,
+        'canada.ca': 0.88,
+        
+        # General government/educational domains (0.80-0.88)
         'gov': 0.85,  # General government domains
         'edu': 0.82,  # General educational domains
+        'ac.uk': 0.82,  # UK academic
+        'edu.au': 0.82,  # Australian academic
         
-        # Tier 2: Verified news sources
+        # Tier 2: Verified news sources (0.75-0.85)
         'reuters.com': 0.85,
         'apnews.com': 0.85,
         'bbc.com': 0.82,
         'bbc.co.uk': 0.82,
         'npr.org': 0.80,
         'pbs.org': 0.80,
+        'economist.com': 0.78,
+        'ft.com': 0.78,  # Financial Times
         
-        # Tier 3: General news and established sources
+        # Tier 3: General news and established sources (0.60-0.75)
         'nytimes.com': 0.75,
         'washingtonpost.com': 0.75,
         'theguardian.com': 0.72,
+        'wsj.com': 0.72,  # Wall Street Journal
         'cnn.com': 0.68,
         'forbes.com': 0.65,
         'techcrunch.com': 0.60,
+        'wired.com': 0.62,
+        'nationalgeographic.com': 0.70,
         
-        # Tier 4: Blogs, forums, and social media
+        # Tier 4: Educational/Reference sites (0.45-0.65)
+        'khanacademy.org': 0.65,
+        'coursera.org': 0.60,
+        'edx.org': 0.60,
+        'britannica.com': 0.70,
+        'merriam-webster.com': 0.65,
+        'dictionary.com': 0.55,
+        
+        # Tier 5: Q&A and homework sites (0.35-0.50)
+        'stackoverflow.com': 0.55,  # Technical Q&A
+        'stackexchange.com': 0.50,
+        'quora.com': 0.40,
+        'brainly.com': 0.35,  # Homework help
+        'chegg.com': 0.35,  # Homework help
+        'gauthmath.com': 0.35,  # Homework help
+        
+        # Tier 6: Blogs, forums, and social media (0.15-0.35)
         'medium.com': 0.35,
         'blogger.com': 0.30,
         'wordpress.com': 0.30,
         'reddit.com': 0.25,
         'twitter.com': 0.20,
+        'x.com': 0.20,  # Twitter/X
         'facebook.com': 0.15,
+        'instagram.com': 0.15,
+        'tiktok.com': 0.10,
+        'flickr.com': 0.30,  # Photo sharing
         
-        # Tier 5: Low credibility - satire, jokes, unreliable
+        # Tier 7: Low credibility - satire, jokes, unreliable (0.05-0.20)
         'theonion.com': 0.05,  # Satire
         'clickhole.com': 0.05,  # Satire
+        'babylonbee.com': 0.05,  # Satire
         'reasons.org': 0.15,  # Advocacy/apologetics site
         'cheeseprofessor.com': 0.20,  # Blog
         'snackstack.net': 0.20,  # Blog
@@ -218,6 +259,21 @@ class RerankerAgent:
         Returns:
             Inferred credibility score
         """
+        # Check if subdomain matches a known domain
+        # e.g., "en.wikipedia.org" should match "wikipedia.org"
+        parts = domain.split('.')
+        if len(parts) > 2:
+            # Try parent domain (last two parts)
+            parent_domain = '.'.join(parts[-2:])
+            if parent_domain in self.DOMAIN_CREDIBILITY_DB:
+                return self.DOMAIN_CREDIBILITY_DB[parent_domain]
+            
+            # Try with subdomain removed (e.g., "www.example.com" -> "example.com")
+            if parts[0] in ['www', 'en', 'fr', 'de', 'es', 'it', 'pt', 'ja', 'zh', 'm', 'mobile']:
+                base_domain = '.'.join(parts[1:])
+                if base_domain in self.DOMAIN_CREDIBILITY_DB:
+                    return self.DOMAIN_CREDIBILITY_DB[base_domain]
+        
         # Check for high-credibility TLDs
         if domain.endswith('.gov'):
             return 0.85
@@ -225,24 +281,49 @@ class RerankerAgent:
             return 0.82
         if domain.endswith('.ac.uk') or domain.endswith('.edu.au'):
             return 0.82
+        if domain.endswith('.mil'):  # Military
+            return 0.85
+        if domain.endswith('.int'):  # International organizations
+            return 0.85
+        
+        # Check for official/organizational TLDs
+        if domain.endswith('.org'):
+            # .org can be high or low credibility, check keywords
+            if any(keyword in domain for keyword in ['wikipedia', 'mozilla', 'apache', 'python', 'nodejs']):
+                return 0.75
+            return 0.55  # Neutral for unknown .org
         
         # Check for low-credibility indicators
-        low_cred_keywords = ['blog', 'wordpress', 'blogspot', 'tumblr', 'wix', 'weebly']
+        low_cred_keywords = ['blog', 'wordpress', 'blogspot', 'tumblr', 'wix', 'weebly', 'squarespace']
         if any(keyword in domain for keyword in low_cred_keywords):
             return 0.30
         
         # Check for social media patterns
-        social_keywords = ['facebook', 'twitter', 'instagram', 'tiktok', 'reddit']
+        social_keywords = ['facebook', 'twitter', 'instagram', 'tiktok', 'reddit', 'snapchat', 'linkedin']
         if any(keyword in domain for keyword in social_keywords):
             return 0.20
         
         # Check for commercial/shop indicators (lower credibility for facts)
-        shop_keywords = ['shop', 'store', 'buy', 'sell', 'market']
+        shop_keywords = ['shop', 'store', 'buy', 'sell', 'market', 'cart', 'checkout']
         if any(keyword in domain for keyword in shop_keywords):
             return 0.25
         
+        # Check for news indicators (moderate credibility for unknown news sites)
+        news_keywords = ['news', 'times', 'post', 'herald', 'tribune', 'gazette', 'journal']
+        if any(keyword in domain for keyword in news_keywords):
+            return 0.55
+        
+        # Check for wiki/encyclopedia patterns
+        if 'wiki' in domain or 'encyclopedia' in domain or 'britannica' in domain:
+            return 0.65
+        
+        # Check for academic/research patterns
+        academic_keywords = ['research', 'journal', 'academic', 'scholar', 'university', 'college']
+        if any(keyword in domain for keyword in academic_keywords):
+            return 0.70
+        
         # Default for unknown domains: slightly below neutral (conservative)
-        return 0.40
+        return 0.45
     
     def calculate_recency_score(
         self,

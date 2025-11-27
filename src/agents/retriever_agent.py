@@ -211,6 +211,70 @@ class RetrieverAgent:
         
         return filtered
     
+    def filter_low_quality_sources(self, sources: List[Source]) -> List[Source]:
+        """Filter out low-quality sources based on domain patterns
+        
+        This removes sources that are unlikely to provide reliable evidence:
+        - Social media posts (unless no other sources available)
+        - Homework help sites with user-generated answers
+        - E-commerce/shopping sites
+        - Personal blogs (unless authoritative)
+        
+        Args:
+            sources: List of sources to filter
+            
+        Returns:
+            Filtered list of higher-quality sources
+        """
+        # Define low-quality domain patterns
+        low_quality_patterns = [
+            # Social media (keep if no other sources)
+            'facebook.com',
+            'twitter.com',
+            'x.com',
+            'instagram.com',
+            'tiktok.com',
+            'snapchat.com',
+            
+            # E-commerce/shopping
+            'amazon.com',
+            'ebay.com',
+            'etsy.com',
+            'alibaba.com',
+            'aliexpress.com',
+            
+            # Personal blogs (generic platforms)
+            'blogspot.com',
+            'tumblr.com',
+            'wix.com',
+            'weebly.com',
+            'squarespace.com',
+        ]
+        
+        # Separate sources into high and low quality
+        high_quality = []
+        low_quality = []
+        
+        for source in sources:
+            domain_lower = source.domain.lower()
+            
+            # Check if domain matches low-quality patterns
+            is_low_quality = any(pattern in domain_lower for pattern in low_quality_patterns)
+            
+            if is_low_quality:
+                low_quality.append(source)
+            else:
+                high_quality.append(source)
+        
+        # If we have enough high-quality sources, use only those
+        # Otherwise, include some low-quality sources as fallback
+        if len(high_quality) >= 5:
+            return high_quality
+        else:
+            # Not enough high-quality sources, include some low-quality ones
+            # Prioritize: keep up to 3 low-quality sources
+            return high_quality + low_quality[:3]
+    
     def retrieve_evidence(
         self,
         claim: AtomicClaim,
@@ -225,7 +289,8 @@ class RetrieverAgent:
         2. Perform image searches if visual content is present
         3. Filter by date
         4. Exclude blocked domains
-        5. Scrape and summarize content
+        5. Filter low-quality sources
+        6. Scrape and summarize content
         
         Args:
             claim: Atomic claim to retrieve evidence for
@@ -259,7 +324,10 @@ class RetrieverAgent:
         # 4. Exclude blocked domains
         all_sources = self.exclude_domains(all_sources)
         
-        # 5. Scrape and summarize content
+        # 5. Filter low-quality sources (NEW)
+        all_sources = self.filter_low_quality_sources(all_sources)
+        
+        # 6. Scrape and summarize content
         evidence_pieces = []
         for source in all_sources:
             try:
