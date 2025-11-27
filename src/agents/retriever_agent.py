@@ -70,8 +70,11 @@ class RetrieverAgent:
         if max_results is None:
             max_results = self.max_results
         
+        # Generate optimized search query
+        search_query = self._generate_search_query(claim.text)
+        
         # Perform search
-        results = self.search_client.web_search(claim.text, max_results)
+        results = self.search_client.web_search(search_query, max_results)
         
         # Convert to Source objects
         sources = []
@@ -86,6 +89,60 @@ class RetrieverAgent:
             sources.append(source)
         
         return sources
+    
+    def _generate_search_query(self, claim_text: str) -> str:
+        """Generate an optimized search query from a claim
+        
+        Converts factual claims into better search queries by:
+        - Extracting key entities and attributes
+        - Removing definitive statements (is, are, was, were)
+        - Adding context keywords
+        
+        Args:
+            claim_text: Original claim text
+            
+        Returns:
+            Optimized search query
+        """
+        import re
+        
+        # Remove trailing punctuation
+        query = claim_text.strip().rstrip('.')
+        
+        # Pattern: "X is/are/was/were Y" → "X Y"
+        # Example: "Eiffel Tower is 600 meters tall" → "Eiffel Tower 600 meters tall"
+        query = re.sub(r'\s+(is|are|was|were|has|have|had)\s+', ' ', query, flags=re.IGNORECASE)
+        
+        # For numerical claims, add context keywords
+        # Example: "Eiffel Tower 600 meters tall" → "Eiffel Tower height meters"
+        if re.search(r'\d+\s*(meters?|feet|km|miles|kg|pounds|years?|celsius|fahrenheit)', query, re.IGNORECASE):
+            # Extract the subject (before the number)
+            match = re.match(r'(.+?)\s+\d+', query)
+            if match:
+                subject = match.group(1).strip()
+                
+                # Determine the attribute being measured
+                if 'meter' in query.lower() or 'feet' in query.lower() or 'tall' in query.lower() or 'high' in query.lower():
+                    attribute = 'height'
+                elif 'kg' in query.lower() or 'pound' in query.lower() or 'weight' in query.lower():
+                    attribute = 'weight'
+                elif 'year' in query.lower() or 'age' in query.lower():
+                    attribute = 'age'
+                elif 'celsius' in query.lower() or 'fahrenheit' in query.lower() or 'temperature' in query.lower():
+                    attribute = 'temperature'
+                else:
+                    attribute = ''
+                
+                # Reconstruct query with attribute
+                if attribute:
+                    query = f"{subject} {attribute}"
+        
+        # For date claims, add context
+        # Example: "Obama was 44th President" → "Obama 44th President United States"
+        if 'president' in query.lower() and 'united states' not in query.lower():
+            query += ' United States'
+        
+        return query
     
     def image_search(self, query: str, max_results: Optional[int] = None) -> List[Source]:
         """Perform image search to collect relevant visual evidence
