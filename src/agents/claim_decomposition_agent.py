@@ -1,6 +1,6 @@
 """Claim Decomposition Agent for KEPLER system
 
-This module handles the extraction of atomic claims from complex input text.
+This module handles the extraction of atomic claims from complex input text and images.
 Each atomic claim is a minimal, self-contained factual statement that can be
 independently verified.
 """
@@ -84,27 +84,62 @@ If the text contains no factual claims, respond with "NO_CLAIMS".
                 logger.warning("No LLM API keys found. Using mock LLM client.")
                 self.llm_client = MockLLMClient()
     
-    def decompose(self, text: str, model: LLM) -> List[AtomicClaim]:
-        """Decompose input text into atomic claims
+    def decompose(self, text: Optional[str], model: LLM, image: Optional[bytes] = None) -> List[AtomicClaim]:
+        """Decompose input text and/or image into atomic claims
         
         Args:
-            text: Input text containing one or more claims
+            text: Optional input text containing one or more claims
             model: LLM model to use for decomposition
+            image: Optional image bytes for vision models
             
         Returns:
             List of AtomicClaim objects
         """
-        if not text or not text.strip():
+        # Need at least text or image
+        if (not text or not text.strip()) and not image:
             return []
         
-        # Generate prompt
-        prompt = self.DECOMPOSITION_PROMPT.format(text=text)
+        # Generate prompt based on input type
+        if image and text:
+            # Both text and image
+            prompt = self.DECOMPOSITION_PROMPT.format(
+                text=f"Text: {text}\n\nPlease also analyze the provided image and extract any claims from it."
+            )
+            original_input = f"{text} [with image]"
+        elif image:
+            # Image only
+            prompt = """You are a fact-checking assistant. Your task is to extract atomic claims from the provided image.
+
+An atomic claim is:
+- A minimal, self-contained factual statement
+- Independently verifiable without additional context
+- Contains only one factual assertion
+- Preserves the original meaning and context
+
+IMPORTANT: Keep lists of people, places, or things together as a single claim.
+
+Analyze the image and extract all factual claims you can identify. This includes:
+- Text visible in the image (screenshots, memes, infographics)
+- Visual information (objects, people, places, events)
+- Any factual statements or assertions made
+
+Format your response as a numbered list, with one claim per line:
+1. [First atomic claim]
+2. [Second atomic claim]
+...
+
+If the image contains no factual claims, respond with "NO_CLAIMS"."""
+            original_input = "[image]"
+        else:
+            # Text only (original behavior)
+            prompt = self.DECOMPOSITION_PROMPT.format(text=text)
+            original_input = text
         
-        # Call LLM
-        response = self.llm_client.generate(prompt, model)
+        # Call LLM (with image if provided)
+        response = self.llm_client.generate(prompt, model, image=image)
         
         # Parse response into atomic claims
-        claims = self._parse_llm_response(response, text)
+        claims = self._parse_llm_response(response, original_input)
         
         return claims
     

@@ -44,12 +44,13 @@ class RealLLMClient:
             logger.warning("Anthropic API key not found")
             self.anthropic_client = None
     
-    def generate(self, prompt: str, model) -> str:
+    def generate(self, prompt: str, model, image: Optional[bytes] = None) -> str:
         """Generate text using the specified model
         
         Args:
             prompt: Input prompt
             model: LLM model object with provider and model_id
+            image: Optional image bytes for vision models
             
         Returns:
             Generated text response
@@ -60,21 +61,22 @@ class RealLLMClient:
         provider = model.provider.lower()
         model_id = model.model_id
         
-        logger.info(f"Generating with {provider}/{model_id}")
+        logger.info(f"Generating with {provider}/{model_id}" + (" (with image)" if image else ""))
         
         if provider == "openai":
-            return self._generate_openai(prompt, model_id)
+            return self._generate_openai(prompt, model_id, image)
         elif provider == "anthropic":
-            return self._generate_anthropic(prompt, model_id)
+            return self._generate_anthropic(prompt, model_id, image)
         else:
             raise ValueError(f"Unsupported provider: {provider}")
     
-    def _generate_openai(self, prompt: str, model_id: str) -> str:
+    def _generate_openai(self, prompt: str, model_id: str, image: Optional[bytes] = None) -> str:
         """Generate using OpenAI API
         
         Args:
             prompt: Input prompt
-            model_id: OpenAI model ID (e.g., "gpt-4", "gpt-3.5-turbo")
+            model_id: OpenAI model ID (e.g., "gpt-4", "gpt-3.5-turbo", "gpt-4-vision-preview")
+            image: Optional image bytes for vision models
             
         Returns:
             Generated text
@@ -83,12 +85,38 @@ class RealLLMClient:
             raise ValueError("OpenAI API key not configured")
         
         try:
-            response = self.openai_client.chat.completions.create(
-                model=model_id,
-                messages=[
+            # Build messages based on whether image is provided
+            if image:
+                # Vision model - include image
+                import base64
+                base64_image = base64.b64encode(image).decode('utf-8')
+                
+                messages = [
+                    {"role": "system", "content": "You are a helpful assistant for fact-checking."},
+                    {
+                        "role": "user",
+                        "content": [
+                            {"type": "text", "text": prompt},
+                            {
+                                "type": "image_url",
+                                "image_url": {
+                                    "url": f"data:image/jpeg;base64,{base64_image}",
+                                    "detail": "high"
+                                }
+                            }
+                        ]
+                    }
+                ]
+            else:
+                # Text-only model
+                messages = [
                     {"role": "system", "content": "You are a helpful assistant for fact-checking."},
                     {"role": "user", "content": prompt}
-                ],
+                ]
+            
+            response = self.openai_client.chat.completions.create(
+                model=model_id,
+                messages=messages,
                 temperature=0.3,  # Lower temperature for more consistent outputs
                 max_tokens=1000,
             )
@@ -101,12 +129,13 @@ class RealLLMClient:
             logger.error(f"OpenAI API error: {str(e)}")
             raise
     
-    def _generate_anthropic(self, prompt: str, model_id: str) -> str:
+    def _generate_anthropic(self, prompt: str, model_id: str, image: Optional[bytes] = None) -> str:
         """Generate using Anthropic API
         
         Args:
             prompt: Input prompt
             model_id: Anthropic model ID (e.g., "claude-3-opus-20240229")
+            image: Optional image bytes for vision models
             
         Returns:
             Generated text
@@ -115,12 +144,45 @@ class RealLLMClient:
             raise ValueError("Anthropic API key not configured")
         
         try:
+            # Build content based on whether image is provided
+            if image:
+                # Vision model - include image
+                import base64
+                base64_image = base64.b64encode(image).decode('utf-8')
+                
+                # Detect image type (default to jpeg)
+                image_type = "image/jpeg"
+                if image[:4] == b'\x89PNG':
+                    image_type = "image/png"
+                elif image[:3] == b'GIF':
+                    image_type = "image/gif"
+                elif image[:4] == b'RIFF' and image[8:12] == b'WEBP':
+                    image_type = "image/webp"
+                
+                content = [
+                    {
+                        "type": "image",
+                        "source": {
+                            "type": "base64",
+                            "media_type": image_type,
+                            "data": base64_image
+                        }
+                    },
+                    {
+                        "type": "text",
+                        "text": prompt
+                    }
+                ]
+            else:
+                # Text-only
+                content = prompt
+            
             response = self.anthropic_client.messages.create(
                 model=model_id,
                 max_tokens=1000,
                 temperature=0.3,
                 messages=[
-                    {"role": "user", "content": prompt}
+                    {"role": "user", "content": content}
                 ]
             )
             

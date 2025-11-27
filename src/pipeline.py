@@ -295,23 +295,25 @@ class PipelineOrchestrator:
             raise
     
     def _decompose_claims(self, multimodal_input: MultimodalInput) -> List[AtomicClaim]:
-        """Stage 2: Decompose input text into atomic claims"""
+        """Stage 2: Decompose input text and/or image into atomic claims"""
         stage_name = "claim_decomposition"
         
         self._log_stage_start(stage_name, {
             "input_text_length": len(multimodal_input.text) if multimodal_input.text else 0,
+            "has_image": multimodal_input.image is not None,
             "model": multimodal_input.decomposition_model.model_id,
         })
         
         start_time = time.time()
         
-        # Decompose claims
-        if not multimodal_input.text:
+        # Decompose claims from text and/or image
+        if not multimodal_input.text and not multimodal_input.image:
             atomic_claims = []
         else:
             atomic_claims = self.claim_decomposer.decompose(
                 multimodal_input.text,
                 multimodal_input.decomposition_model,
+                image=multimodal_input.image,
             )
         
         elapsed_ms = (time.time() - start_time) * 1000
