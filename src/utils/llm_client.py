@@ -26,8 +26,15 @@ class RealLLMClient:
             openai_api_key: OpenAI API key (defaults to env var)
             anthropic_api_key: Anthropic API key (defaults to env var)
         """
-        self.openai_api_key = openai_api_key or os.getenv("OPENAI_API_KEY")
-        self.anthropic_api_key = anthropic_api_key or os.getenv("ANTHROPIC_API_KEY")
+        # Get API keys and strip any whitespace/newlines
+        self.openai_api_key = (openai_api_key or os.getenv("OPENAI_API_KEY") or "").strip()
+        self.anthropic_api_key = (anthropic_api_key or os.getenv("ANTHROPIC_API_KEY") or "").strip()
+        
+        # Set to None if empty after stripping
+        if not self.openai_api_key:
+            self.openai_api_key = None
+        if not self.anthropic_api_key:
+            self.anthropic_api_key = None
         
         # Initialize clients
         if self.openai_api_key:
@@ -141,7 +148,9 @@ class RealLLMClient:
             Generated text
         """
         if not self.anthropic_client:
-            raise ValueError("Anthropic API key not configured")
+            raise ValueError("Anthropic API key not configured. Please set ANTHROPIC_API_KEY in .env file")
+        
+        logger.info(f"Calling Anthropic API with model: {model_id}")
         
         try:
             # Build content based on whether image is provided
@@ -191,5 +200,15 @@ class RealLLMClient:
             return result
             
         except Exception as e:
-            logger.error(f"Anthropic API error: {str(e)}")
-            raise
+            error_msg = str(e)
+            logger.error(f"Anthropic API error: {error_msg}")
+            
+            # Provide more helpful error messages
+            if "connection" in error_msg.lower():
+                raise ConnectionError(f"Failed to connect to Anthropic API. Please check your internet connection. Error: {error_msg}")
+            elif "api_key" in error_msg.lower() or "authentication" in error_msg.lower():
+                raise ValueError(f"Anthropic API authentication failed. Please check your API key. Error: {error_msg}")
+            elif "rate" in error_msg.lower() or "limit" in error_msg.lower():
+                raise ValueError(f"Anthropic API rate limit exceeded. Please wait and try again. Error: {error_msg}")
+            else:
+                raise RuntimeError(f"Anthropic API error: {error_msg}")
