@@ -89,39 +89,75 @@ async def verify_claim(request: VerificationRequest):
         from src.models.data_models import MultimodalInput, LLM
         
         # Create LLM objects from selected model IDs
-        # For now, we'll use a simple mapping - in production this would come from config
         model_mapping = {
+            "gpt-5.1-chat-latest": LLM(
+                model_id="gpt-5.1-chat-latest",  # GPT-5.1 Chat Latest - newest OpenAI model
+                provider="OpenAI",
+                version="gpt-5.1-chat-latest",
+                api_endpoint="https://api.openai.com/v1/chat/completions"
+            ),
+            "gpt-5.1": LLM(
+                model_id="gpt-5.1",  # GPT-5.1 - advanced reasoning model
+                provider="OpenAI",
+                version="gpt-5.1",
+                api_endpoint="https://api.openai.com/v1/chat/completions"
+            ),
+            "gpt-4.1": LLM(
+                model_id="gpt-4.1",  # GPT-4.1 - enhanced GPT-4
+                provider="OpenAI",
+                version="gpt-4.1",
+                api_endpoint="https://api.openai.com/v1/chat/completions"
+            ),
+            "gpt-4o": LLM(
+                model_id="gpt-4o",  # GPT-4o - latest and most capable OpenAI model
+                provider="OpenAI",
+                version="gpt-4o",
+                api_endpoint="https://api.openai.com/v1/chat/completions"
+            ),
+            "gpt-4-turbo": LLM(
+                model_id="gpt-4-turbo",  # GPT-4 Turbo - faster GPT-4 with larger context
+                provider="OpenAI",
+                version="gpt-4-turbo",
+                api_endpoint="https://api.openai.com/v1/chat/completions"
+            ),
             "gpt-4": LLM(
-                model_id="gpt-4",
+                model_id="gpt-4",  # GPT-4 - original GPT-4 model
                 provider="OpenAI",
                 version="gpt-4",
                 api_endpoint="https://api.openai.com/v1/chat/completions"
             ),
             "gpt-3.5-turbo": LLM(
-                model_id="gpt-3.5-turbo",
+                model_id="gpt-3.5-turbo",  # GPT-3.5 Turbo - fast and cost-effective
                 provider="OpenAI",
                 version="gpt-3.5-turbo",
                 api_endpoint="https://api.openai.com/v1/chat/completions"
             ),
-            "claude-3-opus": LLM(
-                model_id="claude-3-opus-20240229",  # Claude 3 Opus
+            "gpt-3.5-turbo-16k": LLM(
+                model_id="gpt-3.5-turbo-16k",  # GPT-3.5 Turbo 16k - larger context window
+                provider="OpenAI",
+                version="gpt-3.5-turbo-16k",
+                api_endpoint="https://api.openai.com/v1/chat/completions"
+            ),
+            "claude-opus-4-5": LLM(
+                model_id="claude-opus-4-5-20251101",  # Claude Opus 4.5 - powerful for complex challenges
                 provider="Anthropic",
-                version="claude-3-opus-20240229",
+                version="claude-opus-4-5-20251101",
                 api_endpoint="https://api.anthropic.com/v1/messages"
             ),
-            "claude-3-sonnet": LLM(
-                model_id="claude-3-5-sonnet-20240620",  # Claude 3.5 Sonnet (stable)
+            "claude-sonnet-4-5": LLM(
+                model_id="claude-sonnet-4-5-20250929",  # Claude Sonnet 4.5 - smart and efficient
                 provider="Anthropic",
-                version="claude-3-5-sonnet-20240620",
+                version="claude-sonnet-4-5-20250929",
                 api_endpoint="https://api.anthropic.com/v1/messages"
             ),
-            "claude-3-haiku": LLM(
-                model_id="claude-3-haiku-20240307",  # Claude 3 Haiku (stable)
+            "claude-haiku-4-5": LLM(
+                model_id="claude-haiku-4-5-20251001",  # Claude Haiku 4.5 - fastest for daily tasks
                 provider="Anthropic",
-                version="claude-3-haiku-20240307",
+                version="claude-haiku-4-5-20251001",
                 api_endpoint="https://api.anthropic.com/v1/messages"
             ),
         }
+
         
         selected_llms = []
         for model_id in request.selected_models:

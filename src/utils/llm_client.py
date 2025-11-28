@@ -121,12 +121,25 @@ class RealLLMClient:
                     {"role": "user", "content": prompt}
                 ]
             
-            response = self.openai_client.chat.completions.create(
-                model=model_id,
-                messages=messages,
-                temperature=0.3,  # Lower temperature for more consistent outputs
-                max_tokens=1000,
-            )
+            # Build API call parameters based on model capabilities
+            params = {
+                "model": model_id,
+                "messages": messages,
+            }
+            
+            # GPT-5.1-chat-latest requires default temperature (1.0) and no max_tokens
+            if model_id == "gpt-5.1-chat-latest":
+                # Use default temperature (1.0) - don't set it
+                pass
+            # GPT-5.1 and GPT-4.1 don't support max_tokens but support custom temperature
+            elif model_id in ["gpt-5.1", "gpt-4.1"]:
+                params["temperature"] = 0.3
+            # All other models support both parameters
+            else:
+                params["temperature"] = 0.3
+                params["max_tokens"] = 1000
+            
+            response = self.openai_client.chat.completions.create(**params)
             
             result = response.choices[0].message.content.strip()
             logger.info(f"OpenAI response received: {len(result)} chars")

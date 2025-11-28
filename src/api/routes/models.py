@@ -33,6 +33,36 @@ async def get_available_models():
     return ModelsResponse(
         models=[
             ModelInfo(
+                id="gpt-5.1-chat-latest",
+                name="GPT-5.1 Chat (Latest)",
+                provider="OpenAI",
+                version="gpt-5.1-chat-latest"
+            ),
+            ModelInfo(
+                id="gpt-5.1",
+                name="GPT-5.1",
+                provider="OpenAI",
+                version="gpt-5.1"
+            ),
+            ModelInfo(
+                id="gpt-4.1",
+                name="GPT-4.1",
+                provider="OpenAI",
+                version="gpt-4.1"
+            ),
+            ModelInfo(
+                id="gpt-4o",
+                name="GPT-4o",
+                provider="OpenAI",
+                version="gpt-4o"
+            ),
+            ModelInfo(
+                id="gpt-4-turbo",
+                name="GPT-4 Turbo",
+                provider="OpenAI",
+                version="gpt-4-turbo"
+            ),
+            ModelInfo(
                 id="gpt-4",
                 name="GPT-4",
                 provider="OpenAI",
@@ -45,22 +75,29 @@ async def get_available_models():
                 version="gpt-3.5-turbo"
             ),
             ModelInfo(
-                id="claude-3-opus",
-                name="Claude 3 Opus",
-                provider="Anthropic",
-                version="claude-3-opus-20240229"
+                id="gpt-3.5-turbo-16k",
+                name="GPT-3.5 Turbo 16k",
+                provider="OpenAI",
+                version="gpt-3.5-turbo-16k"
             ),
             ModelInfo(
-                id="claude-3-sonnet",
-                name="Claude 3.5 Sonnet",
+                id="claude-opus-4-5",
+                name="Claude Opus 4.5",
                 provider="Anthropic",
-                version="claude-3-5-sonnet-20240620"
+                version="claude-opus-4-5-20251101"
             ),
             ModelInfo(
-                id="claude-3-haiku",
-                name="Claude 3 Haiku",
+                id="claude-sonnet-4-5",
+                name="Claude Sonnet 4.5",
                 provider="Anthropic",
-                version="claude-3-haiku-20240307"
+                version="claude-sonnet-4-5-20250929"
+            ),
+            ModelInfo(
+                id="claude-haiku-4-5",
+                name="Claude Haiku 4.5",
+                provider="Anthropic",
+                version="claude-haiku-4-5-20251001"
             ),
         ]
     )
+
