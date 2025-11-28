@@ -253,21 +253,33 @@ Textual Evidence:
 Your task is to fact-check this claim using the provided evidence.
 
 IMPORTANT INSTRUCTIONS:
-1. **Check for CONTRADICTIONS**: If the evidence states a DIFFERENT value/fact than the claim, the verdict is REFUTED.
-   Example: Claim says "600 meters" but evidence says "324 meters" → REFUTED
-   
-2. **Check for CONFIRMATION**: If the evidence confirms the exact claim → SUPPORTED
 
-3. **Check for INSUFFICIENCY**: Only use "Not Enough Information" if:
-   - No relevant evidence found
-   - Evidence is ambiguous or unclear
-   - Evidence doesn't address the claim
-   
-DO NOT use "Not Enough Information" when evidence clearly contradicts the claim!
+1. **RANGES AND VARIATIONS**: 
+   - If the claim states a specific value and evidence provides a RANGE, check if the value falls WITHIN the range
+   - Example: Claim "5000kg" + Evidence "4500-6100kg" → SUPPORTED (5000 is in range)
+   - If evidence shows MULTIPLE variations (species, types, etc.) and claim matches ANY → SUPPORTED
+   - Example: Claim "elephant weighs 5000kg" + Evidence shows 3 species, one weighs ~5000kg → SUPPORTED
+
+2. **CONTRADICTIONS**: 
+   - If the claim value is OUTSIDE the documented range → REFUTED
+   - Example: Claim "600 meters" but evidence says "324 meters" (no range) → REFUTED
+   - Example: Claim "10000kg" but evidence says "4500-6100kg" (outside range) → REFUTED
+
+3. **CONFIRMATION**: 
+   - Exact match → SUPPORTED
+   - Value within documented range → SUPPORTED
+   - Matches one of multiple documented variations → SUPPORTED
+
+4. **INSUFFICIENCY**: 
+   - Only use "Not Enough Information" if:
+     * No relevant evidence found
+     * Evidence is too vague or unclear
+     * Evidence doesn't address the specific claim
+   - DO NOT use when evidence clearly supports or contradicts!
 
 Analyze the evidence and determine the verdict:
-- **SUPPORTED**: Evidence confirms the claim is TRUE
-- **REFUTED**: Evidence proves the claim is FALSE or contradicts it
+- **SUPPORTED**: Evidence confirms the claim (exact match, within range, or matches a variation)
+- **REFUTED**: Evidence contradicts the claim (outside range, different value with no range)
 - **NOT ENOUGH INFORMATION**: Evidence is insufficient, unclear, or missing
 
 Provide your verdict with detailed justification referencing specific evidence.
