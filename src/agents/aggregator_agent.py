@@ -52,7 +52,10 @@ class AggregatorAgent:
         for piece in evidence:
             # Consolidate textual evidence
             if piece.source.content_type == 'text':
-                textual_evidence.append(piece.summary)
+                # Use raw_content (full text) instead of summary for better verification
+                # Limit to 2000 chars per piece to avoid overwhelming the LLM
+                content = piece.raw_content[:2000] if len(piece.raw_content) > 2000 else piece.raw_content
+                textual_evidence.append(content)
                 
                 # Add to evidence map by domain
                 domain = piece.source.domain
