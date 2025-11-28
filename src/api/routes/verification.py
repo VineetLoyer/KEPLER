@@ -104,9 +104,21 @@ async def verify_claim(request: VerificationRequest):
                 api_endpoint="https://api.openai.com/v1/chat/completions"
             ),
             "claude-3-opus": LLM(
-                model_id="claude-3-opus",
+                model_id="claude-3-opus-20240229",  # Use full model ID
                 provider="Anthropic",
                 version="claude-3-opus-20240229",
+                api_endpoint="https://api.anthropic.com/v1/messages"
+            ),
+            "claude-3-sonnet": LLM(
+                model_id="claude-3-5-sonnet-20241022",  # Latest Sonnet version
+                provider="Anthropic",
+                version="claude-3-5-sonnet-20241022",
+                api_endpoint="https://api.anthropic.com/v1/messages"
+            ),
+            "claude-3-haiku": LLM(
+                model_id="claude-3-5-haiku-20241022",  # Latest Haiku version
+                provider="Anthropic",
+                version="claude-3-5-haiku-20241022",
                 api_endpoint="https://api.anthropic.com/v1/messages"
             ),
         }

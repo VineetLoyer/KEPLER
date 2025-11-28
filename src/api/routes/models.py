@@ -28,8 +28,6 @@ async def get_available_models():
     Returns:
         List of available models with metadata
     """
-    # TODO: Implement actual model list from config in task 4
-    # For now, return a placeholder list
     logger.info("Fetching available models")
     
     return ModelsResponse(
@@ -51,6 +49,18 @@ async def get_available_models():
                 name="Claude 3 Opus",
                 provider="Anthropic",
                 version="claude-3-opus-20240229"
+            ),
+            ModelInfo(
+                id="claude-3-sonnet",
+                name="Claude 3.5 Sonnet",
+                provider="Anthropic",
+                version="claude-3-5-sonnet-20241022"
+            ),
+            ModelInfo(
+                id="claude-3-haiku",
+                name="Claude 3.5 Haiku",
+                provider="Anthropic",
+                version="claude-3-5-haiku-20241022"
             ),
         ]
     )
