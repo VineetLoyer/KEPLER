@@ -292,10 +292,19 @@ Analyze the evidence and determine the verdict:
 **BAD JUSTIFICATION (too short):** "The claim is supported by the evidence."
 **GOOD JUSTIFICATION:** "The claim is supported by multiple pieces of evidence. Textual Evidence 1 states that 'the Earth orbits the Sun at an average distance of 149.60 million km.' Textual Evidence 2 from NASA confirms that 'Earth revolves around the Sun in a counterclockwise direction.' Textual Evidence 3 also explains that 'the Earth's path around the Sun is called its orbit.' Therefore, the claim is well-supported by reliable scientific sources."
 
-Format your response as:
-VERDICT: [Supported/Refuted/Not Enough Information]
-CONFIDENCE: [0.0-1.0]
-JUSTIFICATION: [Your DETAILED reasoning with SPECIFIC evidence references - minimum 3-4 sentences]
+===== REQUIRED OUTPUT FORMAT =====
+You MUST respond in EXACTLY this format. Do not deviate from this structure:
+
+VERDICT: [Choose EXACTLY ONE: Supported OR Refuted OR Not Enough Information]
+CONFIDENCE: [A number between 0.0 and 1.0, e.g., 0.85]
+JUSTIFICATION: [Your detailed reasoning here. Must be at least 3-4 sentences. Must reference specific evidence pieces by number. Must quote or paraphrase relevant portions. Must explain how evidence supports/refutes the claim.]
+
+===== EXAMPLE OUTPUT =====
+VERDICT: Refuted
+CONFIDENCE: 0.92
+JUSTIFICATION: The claim is refuted by multiple pieces of evidence. Textual Evidence 1 clearly states that "Mount Everest summit temperatures average around -36°C in winter and -19°C in summer," which directly contradicts the claim of 20°C. Textual Evidence 2 from the National Geographic confirms that "temperatures at the summit never rise above freezing." Textual Evidence 3 also notes that "climbers face extreme cold with temperatures ranging from -20°C to -40°C." Therefore, the claim that summit temperatures average 20°C in summer is clearly refuted by authoritative sources.
+
+===== YOUR RESPONSE (START BELOW) =====
 """
         
         return prompt
@@ -371,24 +380,46 @@ JUSTIFICATION: {justification}"""
         verdict_str = None
         confidence = 0.5
         justification = ""
+        justification_started = False
         
-        for line in lines:
-            if line.startswith('VERDICT:'):
-                verdict_str = line.split(':', 1)[1].strip()
-            elif line.startswith('CONFIDENCE:'):
+        for i, line in enumerate(lines):
+            line_stripped = line.strip()
+            
+            # Parse VERDICT
+            if line_stripped.startswith('VERDICT:'):
+                verdict_str = line_stripped.split(':', 1)[1].strip()
+            
+            # Parse CONFIDENCE
+            elif line_stripped.startswith('CONFIDENCE:'):
                 try:
-                    confidence = float(line.split(':', 1)[1].strip())
-                except ValueError:
+                    conf_str = line_stripped.split(':', 1)[1].strip()
+                    confidence = float(conf_str)
+                    # Clamp confidence to valid range
+                    confidence = max(0.0, min(1.0, confidence))
+                except (ValueError, IndexError):
+                    logger.warning(f"Failed to parse confidence from: {line_stripped}")
                     confidence = 0.5
-            elif line.startswith('JUSTIFICATION:'):
-                justification = line.split(':', 1)[1].strip()
+            
+            # Parse JUSTIFICATION (may span multiple lines)
+            elif line_stripped.startswith('JUSTIFICATION:'):
+                justification = line_stripped.split(':', 1)[1].strip()
+                justification_started = True
+            elif justification_started and line_stripped:
+                # Continue collecting justification lines
+                justification += " " + line_stripped
+        
+        # If no structured format found, try to extract from plain text
+        if not verdict_str or not justification:
+            logger.warning(f"Model {model.model_id} did not follow structured format. Attempting fallback parsing.")
+            verdict_str, confidence, justification = self._fallback_parse(response)
         
         # Validate and convert verdict string to VerdictType
         classification = self._validate_classification(verdict_str)
         
         # Ensure justification is not empty
-        if not justification:
-            justification = f"Verdict: {classification.value}"
+        if not justification or len(justification) < 20:
+            logger.warning(f"Justification too short or empty for {model.model_id}")
+            justification = f"Model verdict: {classification.value}. " + (justification if justification else "No detailed justification provided.")
         
         # Extract evidence references from metadata
         evidence_references = list(evidence.metadata.keys())
@@ -400,6 +431,41 @@ JUSTIFICATION: {justification}"""
             confidence=confidence,
             evidence_references=evidence_references,
         )
+    
+    def _fallback_parse(self, response: str) -> tuple:
+        """Fallback parsing for models that don't follow structured format
+        
+        Args:
+            response: Raw response text
+            
+        Returns:
+            Tuple of (verdict_str, confidence, justification)
+        """
+        response_lower = response.lower()
+        
+        # Try to extract verdict from plain text
+        verdict_str = None
+        if 'supported' in response_lower and 'not' not in response_lower[:response_lower.find('supported')]:
+            verdict_str = "Supported"
+        elif 'refuted' in response_lower or 'refute' in response_lower:
+            verdict_str = "Refuted"
+        elif 'not enough' in response_lower or 'insufficient' in response_lower:
+            verdict_str = "Not Enough Information"
+        
+        # Default confidence for fallback
+        confidence = 0.6
+        
+        # Use entire response as justification if no structure found
+        justification = response.strip()
+        
+        # If justification is too long, try to extract the most relevant part
+        if len(justification) > 1000:
+            # Take first 800 characters
+            justification = justification[:800] + "..."
+        
+        logger.info(f"Fallback parsing extracted: verdict={verdict_str}, confidence={confidence}")
+        
+        return verdict_str, confidence, justification
     
     def _validate_classification(self, verdict_str: str) -> VerdictType:
         """Validate and convert verdict string to VerdictType
