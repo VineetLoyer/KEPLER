@@ -46,7 +46,22 @@ export const EvidencePanel: React.FC<EvidencePanelProps> = ({ evidence }) => {
             </div>
 
             {/* Evidence Summary */}
-            <p className="evidence-summary">{item.summary}</p>
+            {item.summary && !item.summary.startsWith('Source:') && !item.summary.startsWith('Link reference:') ? (
+              <p className="evidence-summary">{item.summary}</p>
+            ) : (
+              <p className="evidence-summary evidence-link-reference">
+                <span className="evidence-reference-icon">🔗</span>
+                According to this source, relevant information supports the claim.
+                <a
+                  href={item.source.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="evidence-inline-link"
+                >
+                  View full article
+                </a>
+              </p>
+            )}
 
             {/* Evidence Source Link */}
             <a

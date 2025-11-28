@@ -74,6 +74,36 @@
   line-height: 1.4;
 }
 
+/* Link Reference Styling */
+.evidence-link-reference {
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  border-radius: 6px;
+  padding: 12px 16px;
+  color: #1e40af;
+  font-style: italic;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.evidence-reference-icon {
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.evidence-inline-link {
+  color: #2563eb;
+  text-decoration: underline;
+  font-weight: 500;
+  margin-left: 4px;
+}
+
+.evidence-inline-link:hover {
+  color: #1d4ed8;
+}
+
 .evidence-credibility-score {
   display: inline-flex;
   align-items: center;

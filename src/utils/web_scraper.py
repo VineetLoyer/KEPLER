@@ -34,28 +34,62 @@ class WebScraper:
             # Parse HTML
             soup = BeautifulSoup(response.text, 'html.parser')
             
-            # Remove script and style elements
-            for script in soup(["script", "style"]):
-                script.decompose()
+            # Remove unwanted elements
+            for element in soup(["script", "style", "nav", "header", "footer", "aside", "iframe", "noscript"]):
+                element.decompose()
             
-            # Get text
-            text = soup.get_text()
+            # Try to find main content area first
+            main_content = None
+            for selector in ['article', 'main', '[role="main"]', '.content', '#content', '.article-body']:
+                main_content = soup.select_one(selector)
+                if main_content:
+                    break
             
-            # Clean up text
+            # If no main content found, use body
+            if not main_content:
+                main_content = soup.find('body') or soup
+            
+            # Get text from main content
+            text = main_content.get_text()
+            
+            # Clean up text - remove excessive whitespace
             lines = (line.strip() for line in text.splitlines())
             chunks = (phrase.strip() for line in lines for phrase in line.split("  "))
             text = ' '.join(chunk for chunk in chunks if chunk)
             
+            # Remove common noise patterns
+            noise_patterns = [
+                "This site needs JavaScript",
+                "Please enable JavaScript",
+                "Clipboard, Search History",
+                "Skip to main",
+                "Cookie Policy",
+                "Privacy Policy",
+                "Accept cookies",
+            ]
+            for pattern in noise_patterns:
+                text = text.replace(pattern, "")
+            
+            # Clean up extra spaces
+            text = ' '.join(text.split())
+            
+            # If content is too short or looks like an error, return link reference instead
+            if len(text) < 100 or "JavaScript" in text[:200]:
+                summary = f"Source: {url} (Content requires JavaScript or is not accessible for scraping)"
+                raw_content = f"Link reference: {url}"
+                return raw_content, summary
+            
             # Limit text length
-            max_length = 5000
+            max_length = 3000  # Reduced from 5000 to focus on relevant content
             raw_content = text[:max_length] if len(text) > max_length else text
             
-            # Create summary (first 500 characters)
-            summary = text[:500] + "..." if len(text) > 500 else text
+            # Create summary (first 300 characters of cleaned content)
+            summary = text[:300] + "..." if len(text) > 300 else text
             
             return raw_content, summary
         
         except Exception as e:
-            # Return error message as content
-            error_msg = f"Failed to scrape {url}: {str(e)}"
-            return error_msg, error_msg
+            # Return link reference instead of error
+            summary = f"Source: {url} (Unable to access content: {str(e)})"
+            raw_content = f"Link reference: {url}"
+            return raw_content, summary
