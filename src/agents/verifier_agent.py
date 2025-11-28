@@ -282,12 +282,20 @@ Analyze the evidence and determine the verdict:
 - **REFUTED**: Evidence contradicts the claim (outside range, different value with no range)
 - **NOT ENOUGH INFORMATION**: Evidence is insufficient, unclear, or missing
 
-Provide your verdict with detailed justification referencing specific evidence.
+**CRITICAL: You MUST provide a DETAILED justification that:**
+1. References SPECIFIC evidence pieces by number (e.g., "Textual Evidence 1 states...", "Textual Evidence 2 confirms...")
+2. Quotes or paraphrases the EXACT relevant portions from each evidence piece
+3. Explains HOW each piece of evidence supports or refutes the claim
+4. Provides a logical conclusion based on the evidence analysis
+5. Is AT LEAST 3-4 sentences long with concrete evidence references
+
+**BAD JUSTIFICATION (too short):** "The claim is supported by the evidence."
+**GOOD JUSTIFICATION:** "The claim is supported by multiple pieces of evidence. Textual Evidence 1 states that 'the Earth orbits the Sun at an average distance of 149.60 million km.' Textual Evidence 2 from NASA confirms that 'Earth revolves around the Sun in a counterclockwise direction.' Textual Evidence 3 also explains that 'the Earth's path around the Sun is called its orbit.' Therefore, the claim is well-supported by reliable scientific sources."
 
 Format your response as:
 VERDICT: [Supported/Refuted/Not Enough Information]
 CONFIDENCE: [0.0-1.0]
-JUSTIFICATION: [Your detailed reasoning with specific evidence references]
+JUSTIFICATION: [Your DETAILED reasoning with SPECIFIC evidence references - minimum 3-4 sentences]
 """
         
         return prompt
