@@ -50,6 +50,8 @@ class AtomicClaim:
     is_atomic: bool
     parent_claim: Optional[str]
     verification_status: Optional[VerdictType]
+    confidence_score: Optional['ConfidenceScore'] = None
+    consensus_verdict: Optional['ConsensusVerdict'] = None
 
 
 @dataclass

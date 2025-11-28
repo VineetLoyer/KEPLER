@@ -155,7 +155,7 @@ export const AtomicClaims: React.FC<AtomicClaimsProps> = ({
                   </div>
 
                   {/* Verification results */}
-                  {claim.verification_status && verificationResult && (
+                  {claim.verification_status && (
                     <div className="atomic-claim-detail-section">
                       <h4 className="atomic-claim-detail-title">Verification Results</h4>
                       <div className="atomic-claim-detail-item">
@@ -165,22 +165,49 @@ export const AtomicClaims: React.FC<AtomicClaimsProps> = ({
                         </span>
                       </div>
                       
-                      {/* Show confidence score if available */}
-                      {verificationResult.confidence_score && (
-                        <div className="atomic-claim-detail-item">
-                          <span className="atomic-claim-detail-label">Confidence:</span>
-                          <span className="atomic-claim-detail-value">
-                            {(verificationResult.confidence_score.overall_score * 100).toFixed(1)}%
-                          </span>
-                        </div>
+                      {/* Show per-claim confidence score */}
+                      {claim.confidence_score && (
+                        <>
+                          <div className="atomic-claim-detail-item">
+                            <span className="atomic-claim-detail-label">Confidence:</span>
+                            <span className="atomic-claim-detail-value">
+                              {(claim.confidence_score.overall_score * 100).toFixed(1)}%
+                            </span>
+                          </div>
+                          
+                          {/* Confidence breakdown */}
+                          <div className="atomic-claim-detail-item">
+                            <span className="atomic-claim-detail-label">Confidence Breakdown:</span>
+                            <div className="atomic-claim-confidence-breakdown">
+                              <div className="confidence-breakdown-item">
+                                <span className="confidence-breakdown-label">Source Reliability:</span>
+                                <span className="confidence-breakdown-value">
+                                  {(claim.confidence_score.source_reliability * 100).toFixed(1)}%
+                                </span>
+                              </div>
+                              <div className="confidence-breakdown-item">
+                                <span className="confidence-breakdown-label">Model Agreement:</span>
+                                <span className="confidence-breakdown-value">
+                                  {(claim.confidence_score.model_agreement * 100).toFixed(1)}%
+                                </span>
+                              </div>
+                              <div className="confidence-breakdown-item">
+                                <span className="confidence-breakdown-label">Evidence Recency:</span>
+                                <span className="confidence-breakdown-value">
+                                  {(claim.confidence_score.evidence_recency * 100).toFixed(1)}%
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                        </>
                       )}
 
-                      {/* Show justification if available */}
-                      {verificationResult.consensus_verdict?.consensus_justification && (
+                      {/* Show per-claim justification */}
+                      {claim.consensus_verdict?.consensus_justification && (
                         <div className="atomic-claim-detail-item atomic-claim-justification">
                           <span className="atomic-claim-detail-label">Justification:</span>
                           <p className="atomic-claim-detail-value">
-                            {verificationResult.consensus_verdict.consensus_justification}
+                            {claim.consensus_verdict.consensus_justification}
                           </p>
                         </div>
                       )}

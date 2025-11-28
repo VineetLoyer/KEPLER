@@ -285,6 +285,36 @@
   line-height: 1.5;
 }
 
+/* Confidence breakdown */
+.atomic-claim-confidence-breakdown {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 8px;
+  padding: 12px;
+  background: #ffffff;
+  border-radius: 4px;
+  border: 1px solid #dee2e6;
+}
+
+.confidence-breakdown-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.875rem;
+}
+
+.confidence-breakdown-label {
+  color: #6c757d;
+  font-weight: 500;
+}
+
+.confidence-breakdown-value {
+  color: #212529;
+  font-weight: 600;
+  font-family: 'Courier New', monospace;
+}
+
 /* Responsive design */
 @media (max-width: 768px) {
   .atomic-claims {

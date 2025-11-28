@@ -153,6 +153,35 @@ async def verify_claim(request: VerificationRequest):
                     "is_atomic": claim.is_atomic,
                     "parent_claim": claim.parent_claim,
                     "verification_status": claim.verification_status.value if claim.verification_status else None,
+                    "confidence_score": {
+                        "overall_score": claim.confidence_score.overall_score,
+                        "source_reliability": claim.confidence_score.source_reliability,
+                        "model_agreement": claim.confidence_score.model_agreement,
+                        "evidence_recency": claim.confidence_score.evidence_recency,
+                        "structured_justification": {
+                            "summary": claim.confidence_score.structured_justification.summary,
+                            "key_evidence": [
+                                {
+                                    "id": e.id,
+                                    "source": {
+                                        "url": e.source.url,
+                                        "title": e.source.title,
+                                        "domain": e.source.domain,
+                                    },
+                                    "summary": e.summary,
+                                    "relevance_score": e.relevance_score,
+                                    "credibility_score": e.credibility_score,
+                                }
+                                for e in claim.confidence_score.structured_justification.key_evidence
+                            ],
+                            "source_links": claim.confidence_score.structured_justification.source_links,
+                        },
+                    } if claim.confidence_score else None,
+                    "consensus_verdict": {
+                        "final_classification": claim.consensus_verdict.final_classification.value,
+                        "consensus_justification": claim.consensus_verdict.consensus_justification,
+                        "agreement_level": claim.consensus_verdict.agreement_level,
+                    } if claim.consensus_verdict else None,
                 }
                 for claim in result.atomic_claims
             ],

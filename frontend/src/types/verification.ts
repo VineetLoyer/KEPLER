@@ -92,6 +92,8 @@ export interface AtomicClaim {
   is_atomic: boolean;
   parent_claim?: string;
   verification_status?: VerdictType;
+  confidence_score?: ConfidenceScore;
+  consensus_verdict?: ConsensusVerdict;
 }
 
 export interface VerificationResult {

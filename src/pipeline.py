@@ -201,7 +201,6 @@ class PipelineOrchestrator:
             # Process each atomic claim independently
             all_evidence_pieces = []
             all_ranked_evidence = []
-            claim_verdicts = {}  # Map claim_id to verdict
             
             for claim in atomic_claims:
                 logger.info(f"Processing atomic claim: {claim.id}")
@@ -229,42 +228,27 @@ class PipelineOrchestrator:
                     multimodal_input.selected_llms,
                 )
                 
-                # Store verdict for this claim
-                claim_verdicts[claim.id] = claim_verdict
+                # Stage 7: Calculate confidence for THIS SPECIFIC CLAIM
+                claim_confidence = self._calculate_confidence(
+                    claim_verdict,
+                    ranked_evidence,
+                    consolidated_evidence.reasoning_chain,
+                    claim,  # Pass the claim for type detection
+                )
                 
-                # Update the claim's verification status
+                # Store verdict and confidence in the claim object
                 claim.verification_status = claim_verdict.final_classification
+                claim.consensus_verdict = claim_verdict
+                claim.confidence_score = claim_confidence
                 
-                logger.info(f"Claim {claim.id} verdict: {claim_verdict.final_classification.value}")
+                logger.info(
+                    f"Claim {claim.id}: {claim_verdict.final_classification.value} "
+                    f"(confidence: {claim_confidence.overall_score:.2%})"
+                )
             
-            # Stage 7: Aggregate all claim verdicts into overall consensus
-            # Use the first claim's verdict as the primary one for now
-            # In a more sophisticated system, you'd aggregate across all claims
-            primary_claim = atomic_claims[0]
-            consensus_verdict = claim_verdicts[primary_claim.id]
-            
-            # Use evidence from all claims for confidence scoring
-            # Aggregate reasoning chains from all claims
-            all_reasoning_chains = []
-            for claim in atomic_claims:
-                claim_evidence = [e for e in all_ranked_evidence if claim.text.lower() in e.summary.lower()]
-                if claim_evidence:
-                    consolidated = self._aggregate_evidence(claim_evidence, claim)
-                    if consolidated.reasoning_chain:
-                        all_reasoning_chains.append(consolidated.reasoning_chain)
-            
-            # Use the first reasoning chain or create empty one
-            primary_reasoning_chain = all_reasoning_chains[0] if all_reasoning_chains else None
-            if primary_reasoning_chain is None:
-                from src.models.data_models import ReasoningChain
-                primary_reasoning_chain = ReasoningChain(steps=[], agreements=[], conflicts=[], gaps=[])
-            
-            # Stage 8: Confidence Scoring (using all evidence)
-            confidence_score = self._calculate_confidence(
-                consensus_verdict,
-                all_ranked_evidence,
-                primary_reasoning_chain,
-            )
+            # Stage 8: Select primary verdict and aggregate confidences
+            primary_verdict = self._select_primary_verdict(atomic_claims)
+            overall_confidence = self._aggregate_claim_confidences(atomic_claims)
             
             # Create processing metadata
             processing_metadata = {
@@ -280,9 +264,9 @@ class PipelineOrchestrator:
             # Create final output
             final_output = FinalOutput(
                 original_input=multimodal_input,
-                atomic_claims=atomic_claims,
-                consensus_verdict=consensus_verdict,
-                confidence_score=confidence_score,
+                atomic_claims=atomic_claims,  # Each claim now has its own confidence
+                consensus_verdict=primary_verdict,
+                confidence_score=overall_confidence,
                 processing_metadata=processing_metadata,
                 trace_log=self.trace_log.copy(),
             )
@@ -621,11 +605,13 @@ class PipelineOrchestrator:
         consensus: ConsensusVerdict,
         evidence: List[EvidencePiece],
         reasoning_chain,
+        claim: AtomicClaim,
     ) -> ConfidenceScore:
-        """Stage 7: Calculate confidence score"""
+        """Stage 7: Calculate confidence score for a specific claim"""
         stage_name = "confidence_scoring"
         
         self._log_stage_start(stage_name, {
+            "claim_id": claim.id,
             "consensus_classification": consensus.final_classification.value,
             "agreement_level": consensus.agreement_level,
             "num_evidence": len(evidence),
@@ -633,17 +619,19 @@ class PipelineOrchestrator:
         
         start_time = time.time()
         
-        # Calculate confidence
+        # Calculate confidence with claim context
         confidence_score = self.confidence_scorer.calculate_confidence(
             consensus,
             evidence,
             reasoning_chain,
+            claim,
         )
         
         elapsed_ms = (time.time() - start_time) * 1000
         
         self._log_stage_complete(stage_name, {
             "status": "success",
+            "claim_id": claim.id,
             "overall_score": confidence_score.overall_score,
             "source_reliability": confidence_score.source_reliability,
             "model_agreement": confidence_score.model_agreement,
@@ -653,6 +641,145 @@ class PipelineOrchestrator:
         })
         
         return confidence_score
+    
+    def _aggregate_claim_confidences(
+        self,
+        claims: List[AtomicClaim]
+    ) -> ConfidenceScore:
+        """Aggregate confidence scores from multiple claims
+        
+        Uses weighted average based on model agreement.
+        """
+        if not claims:
+            from src.models.data_models import StructuredJustification, ReasoningChain
+            return ConfidenceScore(
+                overall_score=0.0,
+                source_reliability=0.0,
+                model_agreement=0.0,
+                evidence_recency=0.0,
+                structured_justification=StructuredJustification(
+                    summary="No claims to verify",
+                    key_evidence=[],
+                    reasoning_chain=ReasoningChain(steps=[], agreements=[], conflicts=[], gaps=[]),
+                    source_links=[],
+                ),
+            )
+        
+        # Calculate weights based on model agreement
+        weights = []
+        for claim in claims:
+            if claim.confidence_score:
+                weight = claim.confidence_score.model_agreement
+                weights.append(weight)
+            else:
+                weights.append(0.0)
+        
+        # Normalize weights
+        total_weight = sum(weights)
+        if total_weight == 0:
+            weights = [1.0 / len(claims)] * len(claims)
+        else:
+            weights = [w / total_weight for w in weights]
+        
+        # Calculate weighted averages
+        overall_score = sum(
+            claim.confidence_score.overall_score * weight
+            for claim, weight in zip(claims, weights)
+            if claim.confidence_score
+        )
+        
+        source_reliability = sum(
+            claim.confidence_score.source_reliability * weight
+            for claim, weight in zip(claims, weights)
+            if claim.confidence_score
+        )
+        
+        model_agreement = sum(
+            claim.confidence_score.model_agreement * weight
+            for claim, weight in zip(claims, weights)
+            if claim.confidence_score
+        )
+        
+        evidence_recency = sum(
+            claim.confidence_score.evidence_recency * weight
+            for claim, weight in zip(claims, weights)
+            if claim.confidence_score
+        )
+        
+        # Aggregate structured justifications
+        all_source_links = []
+        all_key_evidence = []
+        for claim in claims:
+            if claim.confidence_score and claim.confidence_score.structured_justification:
+                all_source_links.extend(
+                    claim.confidence_score.structured_justification.source_links
+                )
+                all_key_evidence.extend(
+                    claim.confidence_score.structured_justification.key_evidence
+                )
+        
+        # Remove duplicates
+        all_source_links = list(set(all_source_links))
+        
+        # Create aggregated justification
+        summary = f"Analyzed {len(claims)} atomic claims with overall confidence {overall_score:.1%}"
+        
+        from src.models.data_models import StructuredJustification
+        structured_justification = StructuredJustification(
+            summary=summary,
+            key_evidence=all_key_evidence[:10],  # Top 10
+            reasoning_chain=claims[0].confidence_score.structured_justification.reasoning_chain if claims[0].confidence_score else None,
+            source_links=all_source_links,
+        )
+        
+        return ConfidenceScore(
+            overall_score=overall_score,
+            source_reliability=source_reliability,
+            model_agreement=model_agreement,
+            evidence_recency=evidence_recency,
+            structured_justification=structured_justification,
+        )
+    
+    def _select_primary_verdict(
+        self,
+        claims: List[AtomicClaim]
+    ) -> ConsensusVerdict:
+        """Select primary verdict from multiple claims
+        
+        Strategy:
+        1. If any claim is REFUTED: overall is REFUTED
+        2. Otherwise: use the verdict with highest confidence
+        """
+        if not claims:
+            from src.models.data_models import Verdict
+            return ConsensusVerdict(
+                final_classification=VerdictType.NOT_ENOUGH_INFO,
+                consensus_justification="No claims to verify",
+                individual_verdicts=[],
+                agreement_level=1.0,
+            )
+        
+        # Check if any claim is REFUTED
+        refuted_claims = [
+            c for c in claims
+            if c.verification_status == VerdictType.REFUTED
+        ]
+        
+        if refuted_claims:
+            # If any claim is refuted, overall is refuted
+            highest_confidence_refuted = max(
+                refuted_claims,
+                key=lambda c: c.confidence_score.overall_score if c.confidence_score else 0.0
+            )
+            return highest_confidence_refuted.consensus_verdict
+        
+        # Otherwise, use highest confidence claim
+        highest_confidence_claim = max(
+            claims,
+            key=lambda c: c.confidence_score.overall_score if c.confidence_score else 0.0
+        )
+        
+        return highest_confidence_claim.consensus_verdict
     
     def _log_stage_start(self, stage_name: str, details: Dict[str, Any]):
         """Log the start of a pipeline stage
