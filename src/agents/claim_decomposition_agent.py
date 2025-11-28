@@ -25,7 +25,7 @@ class ClaimDecompositionAgent:
     """Agent responsible for decomposing complex claims into atomic claims"""
     
     # Prompt template for claim decomposition
-    DECOMPOSITION_PROMPT = """You are a fact-checking assistant. Your task is to extract atomic claims from the given text.
+    DECOMPOSITION_PROMPT = """You are a fact-checking assistant. Extract atomic claims from the given text.
 
 An atomic claim is:
 - A minimal, self-contained factual statement
@@ -33,28 +33,24 @@ An atomic claim is:
 - Contains only one factual assertion
 - Preserves the original meaning and context
 
-IMPORTANT: Keep lists of people, places, or things together as a single claim. For example:
-- "X was founded by A, B, and C" is ONE claim (keep founders together)
-- "X happened in 1990, and Y happened in 2000" is TWO claims (different events)
-
-Given the following text, extract all atomic claims. If the text contains a compound claim (multiple independent factual statements), break it down into separate atomic claims.
+IMPORTANT: Keep lists of people, places, or things together as a single claim.
 
 Text: {text}
 
-Instructions:
-1. Identify each distinct factual statement
-2. Keep lists (people, places, things) together in one claim
-3. Split only when there are truly independent facts
-4. Ensure each claim is self-contained and independently verifiable
-5. Preserve the original meaning without adding new information
+CRITICAL INSTRUCTIONS:
+1. Output ONLY the numbered list of claims - NO explanations, NO notes, NO commentary
+2. Do NOT add phrases like "Let me analyze" or "Note:" or any other text
+3. Extract claims EXACTLY as stated in the original text - do NOT correct errors
+4. Keep lists (people, places, things) together in one claim
+5. Split only when there are truly independent facts
 6. If the text is already atomic, return it as a single claim
 
-Format your response as a numbered list, with one claim per line:
+OUTPUT FORMAT (nothing else):
 1. [First atomic claim]
 2. [Second atomic claim]
 ...
 
-If the text contains no factual claims, respond with "NO_CLAIMS".
+If no factual claims exist, respond with only: NO_CLAIMS
 """
     
     def __init__(self, llm_client: Optional[LLMClient] = None):
@@ -211,6 +207,21 @@ If the image contains no factual claims, respond with "NO_CLAIMS"."""
         for line in lines:
             line = line.strip()
             if not line:
+                continue
+            
+            # Skip lines that are clearly not claims (explanatory text from Claude)
+            skip_patterns = [
+                'let me analyze',
+                'note:',
+                'here are',
+                'i will',
+                'i have',
+                'the claims are',
+                'extracted claims',
+                'atomic claims:',
+                'factual claims:',
+            ]
+            if any(pattern in line.lower() for pattern in skip_patterns):
                 continue
             
             # Remove numbering (e.g., "1. ", "2) ", etc.)

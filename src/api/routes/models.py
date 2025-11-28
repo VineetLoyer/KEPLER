@@ -54,13 +54,13 @@ async def get_available_models():
                 id="claude-3-sonnet",
                 name="Claude 3.5 Sonnet",
                 provider="Anthropic",
-                version="claude-3-5-sonnet-20241022"
+                version="claude-3-5-sonnet-20240620"
             ),
             ModelInfo(
                 id="claude-3-haiku",
-                name="Claude 3.5 Haiku",
+                name="Claude 3 Haiku",
                 provider="Anthropic",
-                version="claude-3-5-haiku-20241022"
+                version="claude-3-haiku-20240307"
             ),
         ]
     )
