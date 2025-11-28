@@ -401,19 +401,72 @@ class AggregatorAgent:
         summary1 = piece1.summary.lower()
         summary2 = piece2.summary.lower()
         
-        # Check for explicit negations
-        negation_words = ['not', 'no', 'never', 'false', 'incorrect', 'wrong', 'untrue']
+        # Check for explicit negations and contradictory terms
+        negation_words = ['not', 'no', 'never', 'false', 'incorrect', 'wrong', 'untrue', 'refuted', 'disproven']
+        contradictory_pairs = [
+            ('true', 'false'),
+            ('correct', 'incorrect'),
+            ('proven', 'disproven'),
+            ('supported', 'refuted'),
+            ('confirmed', 'denied'),
+        ]
         
         has_negation1 = any(word in summary1 for word in negation_words)
         has_negation2 = any(word in summary2 for word in negation_words)
         
-        # If one has negation and they share keywords, they might conflict
+        # Check for contradictory pairs
+        for word1, word2 in contradictory_pairs:
+            if (word1 in summary1 and word2 in summary2) or (word2 in summary1 and word1 in summary2):
+                similarity = self._calculate_similarity(piece1, piece2)
+                # Only flag as conflict if they're talking about the same thing (high similarity)
+                if similarity >= 0.3:
+                    return True
+        
+        # If one has negation and the other doesn't, check if they're actually contradicting
         if has_negation1 != has_negation2:
             similarity = self._calculate_similarity(piece1, piece2)
-            # Lower threshold for conflict detection to catch more contradictions
-            return similarity >= 0.1
+            # Require moderate similarity threshold to detect real conflicts
+            # Only flag as conflict if they share significant content (>25% overlap)
+            if similarity >= 0.25:
+                # Additional check: make sure the negation is actually contradicting the claim
+                # Look for patterns like "not flat" vs "is flat" or "not a double helix" vs "is a double helix"
+                # Extract key claim terms from the non-negated summary
+                non_negated_summary = summary1 if not has_negation1 else summary2
+                negated_summary = summary1 if has_negation1 else summary2
+                claim_terms = self._extract_key_terms(non_negated_summary)
+                
+                # Check if negation is directly contradicting the key terms
+                for term in claim_terms:
+                    # Look for patterns like "not [term]", "[term] is false", "not a [term]"
+                    negation_patterns = [
+                        f"not {term}",
+                        f"not a {term}",
+                        f"not the {term}",
+                        f"{term} is false",
+                        f"{term} is incorrect",
+                        f"{term} is wrong",
+                    ]
+                    if any(pattern in negated_summary for pattern in negation_patterns):
+                        return True
+                
+                # Also check for "is [term]" vs "is not [term]" patterns
+                for term in claim_terms:
+                    if f"is {term}" in non_negated_summary and f"is not {term}" in negated_summary:
+                        return True
+                    if f"is a {term}" in non_negated_summary and f"is not a {term}" in negated_summary:
+                        return True
+                
+                # If no direct contradiction found, don't flag as conflict
+                return False
         
         return False
+    
+    def _extract_key_terms(self, text: str) -> list:
+        """Extract key terms from text (nouns and important words)"""
+        # Simple extraction: words longer than 3 characters that aren't stop words
+        stop_words = {'the', 'a', 'an', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'of', 'is', 'are', 'was', 'were', 'this', 'that', 'with', 'from'}
+        words = text.lower().split()
+        return [w for w in words if len(w) > 3 and w not in stop_words]
     
     def _calculate_conflict_severity(
         self,
