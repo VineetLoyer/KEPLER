@@ -30,25 +30,41 @@ class ClaimDecompositionAgent:
 An atomic claim is:
 - A minimal, self-contained factual statement
 - Independently verifiable without additional context
-- Contains only one factual assertion
+- Contains only ONE factual assertion
 - Preserves the original meaning and context
 
-IMPORTANT: Keep lists of people, places, or things together as a single claim.
+CRITICAL RULES FOR EXTRACTION:
+
+1. **KEEP TOGETHER (Do NOT split):**
+   - Lists of people, places, or things (e.g., "A, B, and C")
+   - Related facts about the same subject (e.g., "X is Y and located at Z")
+   - Compound sentences with "and" connecting related info about same subject
+   - Example: "Mount Everest is 8,849m tall and located on the Nepal-China border" → ONE claim
+
+2. **SPLIT ONLY when:**
+   - Facts are about DIFFERENT subjects
+   - Facts are INDEPENDENT and can be verified separately
+   - Example: "Earth is the third planet. Mars is the fourth planet." → TWO claims
+
+3. **CONSISTENCY:**
+   - Extract the SAME number of claims regardless of model
+   - Be CONSERVATIVE - when in doubt, keep claims together
+   - Aim for 5-8 claims for a typical paragraph
 
 Text: {text}
 
-CRITICAL INSTRUCTIONS:
-1. Output ONLY the numbered list of claims - NO explanations, NO notes, NO commentary
-2. Do NOT add phrases like "Let me analyze" or "Note:" or any other text
-3. Extract claims EXACTLY as stated in the original text - do NOT correct errors
-4. Keep lists (people, places, things) together in one claim
-5. Split only when there are truly independent facts
-6. If the text is already atomic, return it as a single claim
+===== REQUIRED OUTPUT FORMAT =====
+Output ONLY a numbered list. NO explanations. NO notes. NO commentary. NO "Let me analyze" or "Here are the claims" or similar phrases.
 
-OUTPUT FORMAT (nothing else):
+CORRECT FORMAT:
 1. [First atomic claim]
 2. [Second atomic claim]
-...
+3. [Third atomic claim]
+
+INCORRECT FORMAT (DO NOT DO THIS):
+"Let me analyze this text. Here are the atomic claims:
+1. [claim]
+Note: I kept related facts together."
 
 If no factual claims exist, respond with only: NO_CLAIMS
 """

@@ -252,35 +252,51 @@ Textual Evidence:
         prompt += """
 Your task is to fact-check this claim using the provided evidence.
 
-IMPORTANT INSTRUCTIONS:
+===== CRITICAL DECISION RULES =====
+
+**BE DECISIVE - Avoid "Not Enough Information" unless truly necessary!**
 
 1. **RANGES AND VARIATIONS**: 
-   - If the claim states a specific value and evidence provides a RANGE, check if the value falls WITHIN the range
+   - If claim states a value and evidence provides a RANGE → check if value is WITHIN range
    - Example: Claim "5000kg" + Evidence "4500-6100kg" → SUPPORTED (5000 is in range)
-   - If evidence shows MULTIPLE variations (species, types, etc.) and claim matches ANY → SUPPORTED
-   - Example: Claim "elephant weighs 5000kg" + Evidence shows 3 species, one weighs ~5000kg → SUPPORTED
+   - If evidence shows MULTIPLE variations and claim matches ANY → SUPPORTED
+   - Example: Claim "elephant weighs 5000kg" + Evidence shows 3 species, one ~5000kg → SUPPORTED
 
 2. **CONTRADICTIONS**: 
-   - If the claim value is OUTSIDE the documented range → REFUTED
-   - Example: Claim "600 meters" but evidence says "324 meters" (no range) → REFUTED
+   - If claim value is OUTSIDE documented range → REFUTED
+   - Example: Claim "600m" but evidence says "324m" (no range) → REFUTED
    - Example: Claim "10000kg" but evidence says "4500-6100kg" (outside range) → REFUTED
 
 3. **CONFIRMATION**: 
    - Exact match → SUPPORTED
    - Value within documented range → SUPPORTED
    - Matches one of multiple documented variations → SUPPORTED
+   - General statement confirmed by specific examples → SUPPORTED
 
-4. **INSUFFICIENCY**: 
-   - Only use "Not Enough Information" if:
-     * No relevant evidence found
-     * Evidence is too vague or unclear
-     * Evidence doesn't address the specific claim
-   - DO NOT use when evidence clearly supports or contradicts!
+4. **WHEN TO USE "NOT ENOUGH INFORMATION"** (RARE - use sparingly!):
+   - ONLY if NO relevant evidence found at all
+   - ONLY if evidence is completely unrelated to the claim
+   - ONLY if evidence is too vague to make ANY determination
+   - DO NOT use if evidence partially addresses the claim - make a decision!
+   - DO NOT use if you can infer from context - be decisive!
+
+===== EXAMPLES OF BEING DECISIVE =====
+
+❌ BAD (too cautious): "Not Enough Information - evidence doesn't explicitly state the exact claim"
+✅ GOOD (decisive): "SUPPORTED - Textual Evidence 1 states X which confirms the claim"
+
+❌ BAD (too cautious): "Not Enough Information - only 2 sources mention this"
+✅ GOOD (decisive): "SUPPORTED - Multiple sources (Evidence 1 and 2) confirm this fact"
+
+❌ BAD (too cautious): "Not Enough Information - evidence is about related topic"
+✅ GOOD (decisive): "REFUTED - Evidence contradicts the claim by stating Y instead of X"
+
+===== YOUR TASK =====
 
 Analyze the evidence and determine the verdict:
-- **SUPPORTED**: Evidence confirms the claim (exact match, within range, or matches a variation)
-- **REFUTED**: Evidence contradicts the claim (outside range, different value with no range)
-- **NOT ENOUGH INFORMATION**: Evidence is insufficient, unclear, or missing
+- **SUPPORTED**: Evidence confirms the claim (be generous - if evidence supports it, say so!)
+- **REFUTED**: Evidence contradicts the claim (be clear when evidence shows opposite)
+- **NOT ENOUGH INFORMATION**: ONLY if truly no relevant evidence (use sparingly!)
 
 **CRITICAL: You MUST provide a DETAILED justification that:**
 1. References SPECIFIC evidence pieces by number (e.g., "Textual Evidence 1 states...", "Textual Evidence 2 confirms...")
