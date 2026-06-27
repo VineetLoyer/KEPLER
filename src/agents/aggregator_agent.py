@@ -1,5 +1,4 @@
 """Aggregator Agent for KEPLER system
-
 This module handles the synthesis of multimodal evidence and applies chain-of-thought
 reasoning to consolidate text, images, and metadata. It identifies agreements, conflicts,
 and information gaps in the evidence.

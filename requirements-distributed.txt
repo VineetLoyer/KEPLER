@@ -1,0 +1,3 @@
+# Optional dependencies for distributed pipeline and batch evaluation
+kafka-python>=2.0.2
+pyspark>=3.5.0

@@ -479,7 +479,7 @@ class TestTraceabilityIntegration:
                 pytest.fail(f"Invalid timestamp: {entry['timestamp']}")
         
         # Verify we can inspect individual stages
-        for stage in ["input_processing", "claim_decomposition", "verification"]:
+        for stage in ["input_processing", "claim_decomposition", "multi_model_verification"]:
             stage_entries = orchestrator.inspect_stage(stage)
             assert len(stage_entries) > 0
             
@@ -535,7 +535,8 @@ class TestTraceabilityIntegration:
             "evidence_retrieval",
             "evidence_reranking",
             "evidence_aggregation",
-            "verification",
+            "multi_model_verification",
+            "consensus_aggregation",
             "confidence_scoring",
         ]
         

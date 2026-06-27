@@ -96,8 +96,9 @@ class PipelineOrchestrator:
         3. Evidence Retrieval
         4. Evidence Reranking
         5. Evidence Aggregation
-        6. Verification
-        7. Confidence Scoring
+        6. Multi-Model Verification
+        7. Consensus Aggregation
+        8. Confidence Scoring
         
         Each stage is logged for complete traceability.
         
@@ -563,26 +564,21 @@ class PipelineOrchestrator:
         evidence: ConsolidatedEvidence,
         models: List,
     ) -> ConsensusVerdict:
-        """Stage 6: Verify claim using multiple LLMs and aggregate results"""
-        stage_name = "verification"
-        
-        self._log_stage_start(stage_name, {
+        """Stages 6–7: Parallel LLM verification followed by consensus aggregation"""
+        verify_stage = "multi_model_verification"
+        consensus_stage = "consensus_aggregation"
+
+        self._log_stage_start(verify_stage, {
             "claim_id": claim.id,
             "num_models": len(models),
             "models": [m.model_id for m in models],
         })
-        
-        start_time = time.time()
-        
-        # Verify with ensemble
+
+        verify_start = time.time()
         individual_verdicts = self.verifier.verify_with_ensemble(claim, evidence, models)
-        
-        # Aggregate verdicts
-        consensus = self.multi_model_aggregator.aggregate_verdicts(individual_verdicts)
-        
-        elapsed_ms = (time.time() - start_time) * 1000
-        
-        self._log_stage_complete(stage_name, {
+        verify_elapsed_ms = (time.time() - verify_start) * 1000
+
+        self._log_stage_complete(verify_stage, {
             "status": "success",
             "individual_verdicts": [
                 {
@@ -593,11 +589,25 @@ class PipelineOrchestrator:
                 }
                 for v in individual_verdicts
             ],
+            "elapsed_ms": verify_elapsed_ms,
+        })
+
+        self._log_stage_start(consensus_stage, {
+            "claim_id": claim.id,
+            "num_verdicts": len(individual_verdicts),
+        })
+
+        consensus_start = time.time()
+        consensus = self.multi_model_aggregator.aggregate_verdicts(individual_verdicts)
+        consensus_elapsed_ms = (time.time() - consensus_start) * 1000
+
+        self._log_stage_complete(consensus_stage, {
+            "status": "success",
             "consensus_classification": consensus.final_classification.value,
             "agreement_level": consensus.agreement_level,
-            "elapsed_ms": elapsed_ms,
+            "elapsed_ms": consensus_elapsed_ms,
         })
-        
+
         return consensus
     
     def _calculate_confidence(
@@ -607,7 +617,7 @@ class PipelineOrchestrator:
         reasoning_chain,
         claim: AtomicClaim,
     ) -> ConfidenceScore:
-        """Stage 7: Calculate confidence score for a specific claim"""
+        """Stage 8: Calculate confidence score for a specific claim"""
         stage_name = "confidence_scoring"
         
         self._log_stage_start(stage_name, {

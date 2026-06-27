@@ -1,5 +1,4 @@
 """Retriever Agent for KEPLER system
-
 This module handles the collection of multimodal evidence from the web using
 multiple search strategies including web search, image search, and reverse
 image search. It also implements temporal filtering and domain exclusion.

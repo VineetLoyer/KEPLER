@@ -109,7 +109,8 @@ class TestPipelineTraceability:
             "evidence_retrieval",
             "evidence_reranking",
             "evidence_aggregation",
-            "verification",
+            "multi_model_verification",
+            "consensus_aggregation",
             "confidence_scoring",
         ]
         
@@ -254,7 +255,8 @@ class TestPipelineTraceability:
             "evidence_retrieval",
             "evidence_reranking",
             "evidence_aggregation",
-            "verification",
+            "multi_model_verification",
+            "consensus_aggregation",
             "confidence_scoring",
         ]
         

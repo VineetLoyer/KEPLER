@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "kepler"
 version = "0.1.0"
-description = "Knowledge Extraction Pipeline for Logical Evidence and Reasoning"
+description = "Multimodal fact-verification pipeline with 8-stage agent architecture, multi-LLM consensus, and FEVER benchmark evaluation"
 readme = "README.md"
 requires-python = ">=3.9"
 dependencies = [

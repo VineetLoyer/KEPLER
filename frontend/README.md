@@ -1,6 +1,6 @@
 # KEPLER Web Interface
 
-A responsive web application for interacting with the KEPLER fact-verification system.
+React client for the [KEPLER](../README.md) fact-verification system. For architecture, benchmarks, and backend setup, see the [root README](../README.md) and [Architecture docs](../docs/ARCHITECTURE.md).
 
 ## Features
 

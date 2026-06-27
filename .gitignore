@@ -1,0 +1,53 @@
+# Environment and secrets
+.env
+.env.*
+!.env.example
+frontend/.env
+frontend/.env.*
+!frontend/.env.example
+config.json
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+dist/
+*.egg-info/
+.eggs/
+env/
+venv/
+ENV/
+.venv
+
+# Testing and coverage
+.pytest_cache/
+.coverage
+htmlcov/
+.hypothesis/
+
+# Node / frontend
+node_modules/
+frontend/dist/
+frontend/dist-ssr/
+*.local
+
+# IDE and tooling
+.vscode/
+.idea/
+.kiro/
+*.swp
+*.swo
+.DS_Store
+
+# Logs and local artifacts
+*.log
+evaluation/results/
+evaluation/data/
+
+# Academic / local-only artifacts
+CSCI544_Final/
+Project_proposal.pdf
+*.zip
